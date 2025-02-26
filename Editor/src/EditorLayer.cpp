@@ -1,6 +1,10 @@
 #include "EditorLayer.h"
 #include "Core/Application.h"
 #include "MenuBar.h"
+#include "Inspector.h"
+#include "Hierarchy.h"
+#include "Viewport.h"
+#include "Resource.h"
 
 namespace LTB {
 
@@ -8,7 +12,26 @@ namespace LTB {
         :Layer("EditorLayer"){}
 
     void EditorLayer::OnAttach(){
+        Application::Get().AttachCallback<SelectEvent>([this] (auto e){
+            for(auto& window : mWindows)
+                window->OnSelect(Application::Get().ToEntt<Entity>(e.EnttID));
+        });
+
         OnGuiStart();
+
+        auto asset = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
+        auto asset1 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
+        auto asset2 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
+        auto asset3 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
+
+        // auto cam = Application::Get().CreateEntt<Entity>();
+        // cam.Attach<InfoComponent>().Name = "Cam";
+        // cam.Attach<CameraComponent>();
+        // auto& camTs = cam.Attach<TransformComponent>().Transforms;
+        // camTs.translation = Vector3{0.0f};
+
+        auto test = Application::Get().CreateEntt<Entity>();
+        test.Attach<InfoComponent>().Name = "Test";
     }
 
     void EditorLayer::OnDetach(){
@@ -70,6 +93,10 @@ namespace LTB {
 
     void EditorLayer::OnGuiStart(){
         AttachWindow<MenuBarWindow>();
+        AttachWindow<InspectorWindow>();
+        AttachWindow<HierarchyWindow>();
+        AttachWindow<ViewportWindow>();
+        AttachWindow<ResourceWindow>();
     }
 
     void EditorLayer::OnGuiFrame(){

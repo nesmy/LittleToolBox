@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Events.h"
+#include "Inputs.h"
 
 namespace LTB {
 

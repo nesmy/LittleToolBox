@@ -11,6 +11,16 @@ namespace LTB{
     // entity registry
     using EntityRegistry = entt::registry;
 
+    using AssetID = uint64_t;
+    const AssetID EMPTY_ASSET = 0u;
+
+    // runtime type
+    template <typename T>
+    inline constexpr uint32_t TypeID()
+    {
+        return static_cast<uint32_t>(reinterpret_cast<std::uintptr_t>(&typeid(T)));
+    }
+
     // generate random 64 bit
     inline uint64_t RandomU64() 
     {

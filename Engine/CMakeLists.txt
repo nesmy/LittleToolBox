@@ -9,11 +9,16 @@ add_library(${PROJECT_NAME} ${sources} ${headers})
 
 target_precompile_headers(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ltbpch.h)
 
+# add_compile_definitions(LTB_ENABLE_ASSERTS)
+
 # include directories
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Core
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/Renderer
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/ImGui
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/Auxiliaries
     ${CMAKE_SOURCE_DIR}/Vendor/raylib/src    
     ${CMAKE_SOURCE_DIR}/Vendor/entt/src
     ${CMAKE_SOURCE_DIR}/Vendor/imgui

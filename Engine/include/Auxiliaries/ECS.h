@@ -4,6 +4,13 @@
 
 namespace LTB {
 
+    // common component
+    struct InfoComponent{
+        inline InfoComponent(const InfoComponent&) = default;
+        inline InfoComponent() = default;
+        std::string Name = "Entity";
+    };
+
     // base entity
     struct Entity 
     {

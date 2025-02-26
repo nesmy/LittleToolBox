@@ -29,7 +29,7 @@ namespace LTB {
                         // context->Serialize(context->GetContext()->Scene, "Resources/Projects/savedscene.yaml"); 
                     }
                     if (ImGui::MenuItem(ICON_FA_DOOR_CLOSED " Exit", "Alt+F4")) {
-                        // Application::Get().Close();    
+                        Application::Get().Close();    
                     }
                     ImGui::EndMenu();
                 }
@@ -37,9 +37,9 @@ namespace LTB {
                 {
                     if (ImGui::MenuItem(ICON_FA_FORWARD " Add Entity")) 
                     {
-                        // auto entity = Application::Get().CreateEntt<Entity>();
+                        auto entity = Application::Get().CreateEntt<Entity>();
                         // entity.template Attach<TransformComponent>();
-                        // entity.template Attach<InfoComponent>().Name = "New Entity";
+                        entity.template Attach<InfoComponent>().Name = "New Entity";
                     }
 
                     if (ImGui::MenuItem(ICON_FA_FORWARD " Undo", "CTRL+Z")) {}
@@ -55,7 +55,7 @@ namespace LTB {
                 {
                     if (ImGui::MenuItem(ICON_FA_PALETTE " Theme")) {}
                     if (ImGui::MenuItem("3d/2d")) {
-                        // context->Switch2D();
+                        Application::Get().GetRenderer().SwitchCam();
                     }
                     ImGui::EndMenu();
                 }

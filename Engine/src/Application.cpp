@@ -1,3 +1,4 @@
+#include "ltbpch.h"
 #include "Application.h"
 
 namespace LTB{
@@ -10,8 +11,9 @@ namespace LTB{
 
         sInstance = this;
         mWindow = CreateScope<Window>();
-
-        mWindow->Init(500, 500, "Hello Window");
+        mWindow->Init(1040, 960, "Hello Window");
+        mRenderer = CreateScope<Renderer>();
+        mAssets = CreateScope<AssetRegistry>();
 
         mImGuiLayer = new ImGuiLayer();
         PushOverlay(mImGuiLayer);
@@ -33,17 +35,35 @@ namespace LTB{
 
     void Application::Run(){
 
+        
         while(mWindow->ShouldClose()){
-            BeginDrawing();
-            ClearBackground(BLACK);
-
-            mImGuiLayer->Begin();
-            {
-                for(Layer* layer: mLayerStack)
-                    layer->OnImGuiRender();
-            }
-            mImGuiLayer->End();
-            EndDrawing();
+            Update();
+            Render();
         }
+    }
+
+    void Application::Update(){
+        mDispatcher.PollEvents();
+        mRenderer->Update();        
+    }
+
+    void Application::Render(){
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        mRenderer->GetBuffer()->Bind();
+        mRenderer->GlobalCam();
+        ClearBackground(RED);
+        DrawGrid(10, 1.0);
+        mRenderer->EndCam();
+        mRenderer->GetBuffer()->Unbind();
+
+        mImGuiLayer->Begin();
+        {
+            for(Layer* layer: mLayerStack)
+                layer->OnImGuiRender();
+        }
+        mImGuiLayer->End();
+        EndDrawing();
     }
 }
