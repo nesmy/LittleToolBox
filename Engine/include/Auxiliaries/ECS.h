@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config.h"
+#include "Data.h"
 
 namespace LTB {
 
@@ -9,6 +10,43 @@ namespace LTB {
         inline InfoComponent(const InfoComponent&) = default;
         inline InfoComponent() = default;
         std::string Name = "Entity";
+    };
+
+    // transform component
+    struct TransformComponent {
+        inline TransformComponent(const TransformComponent&) = default;
+        inline TransformComponent() = default; 
+        Transform Transforms;
+    };
+
+    // camera component
+    struct CameraComponent {
+        inline CameraComponent(const CameraComponent&) = default;
+        inline CameraComponent() = default; 
+        Camera3D Camera; 
+    };
+
+    // camera2D component
+    struct Camera2DComponent
+    {
+        inline Camera2DComponent(const Camera2DComponent&) = default;
+        inline Camera2DComponent() = default;
+	    Camera2D Camera;
+    };
+
+    // model component
+    struct ModelComponent 
+    { 
+        inline ModelComponent(const ModelComponent&) = default;
+        inline ModelComponent() = default; 
+        Model mModel;
+    };
+
+    // sprite component
+    struct SpriteComponent {
+        inline SpriteComponent(const SpriteComponent&) = default;
+        inline SpriteComponent() = default; 
+        Sprite mSprite;
     };
 
     // base entity

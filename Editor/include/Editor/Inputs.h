@@ -42,13 +42,13 @@ namespace LTB {
     }
 
     // shows vec3 input field
-    // inline bool InputVec3(const char* label, Vector3* value) 
-    // {
-    //     BeginInput(label);        
-    //     bool hasChanged = ImGui::InputFloat3("##", &value->x);        
-    //     EndInput();
-    //     return hasChanged;
-    // }
+    inline bool InputVec3(const char* label, Vector3* value) 
+    {
+        BeginInput(label);        
+        bool hasChanged = ImGui::InputFloat3("##", &value->x);        
+        EndInput();
+        return hasChanged;
+    }
 
     // shows bool input field
     inline bool InputColor(const char* label, float* value) 

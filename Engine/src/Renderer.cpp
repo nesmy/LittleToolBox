@@ -1,5 +1,7 @@
 #include "ltbpch.h"
 #include "Renderer/Renderer.h"
+#include "Application.h"
+#include "ECS.h"
 
 namespace LTB {
 
@@ -13,7 +15,7 @@ namespace LTB {
         mGlobalCam.projection = CAMERA_PERSPECTIVE;
 
         Switch2d = false;
-        StopUpdate = false;
+        StopUpdate = false;        
     }
 
     Renderer::~Renderer(){
@@ -24,6 +26,21 @@ namespace LTB {
         mBuffer->Resize();
         if(StopUpdate == false)
             UpdateCamera(&mGlobalCam, CAMERA_FREE);
+    }
+
+
+    void Renderer::Render(){
+        Application::Get().EnttView<Entity, ModelComponent>([this] (auto entity, auto& comp){
+            auto& transform = entity.template Get<TransformComponent>().Transforms;            
+            DrawModel(comp.mModel, Vector3Zero(), 1.0f, WHITE);
+        });
+
+        Application::Get().EnttView<Entity, SpriteComponent>([this] (auto entity, auto& comp){
+            auto& transform = entity.template Get<TransformComponent>().Transforms;
+            DrawTextureV(comp.mSprite.Texture, {transform.translation.x, transform.translation.y}, WHITE);
+            LTB_CORE_INFO("x: {}, y: {}",transform.translation.x, transform.translation.y);
+        });
+        DrawGrid(10, 1.0);
     }
 
     void Renderer::GlobalCam(){

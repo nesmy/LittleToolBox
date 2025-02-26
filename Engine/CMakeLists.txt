@@ -5,9 +5,16 @@ project(Engine)
 file(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE headers ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 
-add_library(${PROJECT_NAME} ${sources} ${headers})
+file(GLOB ImGuizmo ${CMAKE_SOURCE_DIR}/Vendor/ImGuizmo/ImGuizmo.cpp)
+file(GLOB ImGuizmoH ${CMAKE_SOURCE_DIR}/Vendor/ImGuizmo/ImGuizmo.h)
+
+add_library(${PROJECT_NAME} ${sources} ${headers} ${ImGuizmoH} ${ImGuizmo} )
 
 target_precompile_headers(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ltbpch.h)
+set_source_files_properties(${ImGuizmo}
+  PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+set_source_files_properties(${ImGuizmoH}
+    PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 
 # add_compile_definitions(LTB_ENABLE_ASSERTS)
 
@@ -25,6 +32,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_SOURCE_DIR}/Vendor/rImGui
     ${CMAKE_SOURCE_DIR}/Vendor/imgui/backends
     ${CMAKE_SOURCE_DIR}/Vendor/spdlog/include
+    ${CMAKE_SOURCE_DIR}/Vendor/ImGuizmo
 )
 
 # link libraries
@@ -33,7 +41,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     spdlog   
     EnTT
     imgui
-    rImGui
+    rImGui    
 )
 
 

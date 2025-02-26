@@ -18,13 +18,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Windows    
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Editor    
     ${CMAKE_SOURCE_DIR}/Engine/include
-    # ${CMAKE_SOURCE_DIR}/Vendor/raylib/src
-    # ${CMAKE_SOURCE_DIR}/Vendor/raylib-cpp/include
-    # ${CMAKE_SOURCE_DIR}/Vendor/spdlog/include
-    # ${CMAKE_SOURCE_DIR}/Vendor/imgui
-    # ${CMAKE_SOURCE_DIR}/Vendor/rImGui
-    # ${CMAKE_SOURCE_DIR}/Vendor/entt/src
-    # ${CMAKE_SOURCE_DIR}/Vendor/imgui/backends
+    ${CMAKE_SOURCE_DIR}/Vendor/ImGuizmo
+    # ${CMAKE_SOURCE_DIR}/Vendor/raylib-gizmo/src
+    
 )
 
 # link directories

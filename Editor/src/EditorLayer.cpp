@@ -6,6 +6,8 @@
 #include "Viewport.h"
 #include "Resource.h"
 
+#include <ImGuizmo.h>
+
 namespace LTB {
 
     EditorLayer::EditorLayer()
@@ -23,6 +25,7 @@ namespace LTB {
         auto asset1 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
         auto asset2 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
         auto asset3 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
+        auto model1 = Application::Get().GetAssets().AddModel(RandomU64(), "Resources/Models/sphere.obj");
 
         // auto cam = Application::Get().CreateEntt<Entity>();
         // cam.Attach<InfoComponent>().Name = "Cam";
@@ -32,6 +35,15 @@ namespace LTB {
 
         auto test = Application::Get().CreateEntt<Entity>();
         test.Attach<InfoComponent>().Name = "Test";
+        test.Attach<TransformComponent>();
+        test.Attach<ModelComponent>().mModel = model1->Data;
+
+        auto test1 = Application::Get().CreateEntt<Entity>();
+        test1.Attach<InfoComponent>().Name = "Test1";
+        auto ts = test1.Attach<TransformComponent>().Transforms;
+        test1.Attach<SpriteComponent>().mSprite.Texture = asset1->Data;
+        ts.translation.x = 100;
+        ts.translation.y = 100;
     }
 
     void EditorLayer::OnDetach(){

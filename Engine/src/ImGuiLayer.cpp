@@ -4,6 +4,8 @@
 
 #include "Application.h"
 
+#include <ImGuizmo.h>
+
 #define FONT_FILE "Data/Fonts/Roboto-Medium.ttf"
 #define ICON_FONT "Data/Fonts/fa-solid-900.ttf"
 #define REGULAR_FONT_SIZE 17
@@ -73,6 +75,7 @@ namespace LTB {
         // Start the Dear ImGui frame
         ImGui_ImplRaylib_NewFrame();
         ImGui::NewFrame();
+        ImGuizmo::BeginFrame();
     }
 
     void ImGuiLayer::End(){    

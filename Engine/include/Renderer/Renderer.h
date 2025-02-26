@@ -2,6 +2,7 @@
 
 #include "Framebuffer.h"
 
+
 namespace LTB {
 
     class Renderer{
@@ -10,6 +11,8 @@ namespace LTB {
         ~Renderer();
 
         void Update();
+
+        void Render();
 
         inline const Scope<Framebuffer>& GetBuffer() const {
             return mBuffer;
@@ -21,6 +24,9 @@ namespace LTB {
         void SwitchCam();
 
         void BlockUpdate(bool update);
+
+        //temp
+        Camera3D &GetCam() { return mGlobalCam;}
     private:
         Scope<Framebuffer> mBuffer;
         Camera3D mGlobalCam = {0};

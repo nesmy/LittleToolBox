@@ -1,12 +1,13 @@
 #pragma once
 #include "EnttInfo.h"
-
+#include "Transform.h"
 
 namespace LTB {
 
     struct InspectorWindow : public IWidget{
         inline InspectorWindow(EditorLayer* context): IWidget(context){
             mWidgets.push_back(context->CreateWidget<InfoControl>());
+            mWidgets.push_back(context->CreateWidget<TransformControl>());
         }
 
         inline void OnShow(EditorLayer* context) override{

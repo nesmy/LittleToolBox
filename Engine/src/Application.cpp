@@ -11,7 +11,7 @@ namespace LTB{
 
         sInstance = this;
         mWindow = CreateScope<Window>();
-        mWindow->Init(1040, 960, "Hello Window");
+        mWindow->Init(1600, 960, "Hello Window");
         mRenderer = CreateScope<Renderer>();
         mAssets = CreateScope<AssetRegistry>();
 
@@ -54,7 +54,7 @@ namespace LTB{
         mRenderer->GetBuffer()->Bind();
         mRenderer->GlobalCam();
         ClearBackground(RED);
-        DrawGrid(10, 1.0);
+        mRenderer->Render();
         mRenderer->EndCam();
         mRenderer->GetBuffer()->Unbind();
 

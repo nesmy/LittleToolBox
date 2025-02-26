@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config.h"
+#include "Data.h"
 
 namespace LTB {    
 
@@ -11,6 +12,8 @@ namespace LTB {
         UNKNOWN = 0,
         TEXTURE,
         SCENE,
+        MODEL,
+        SPRTIE,
     };
 
      // define the base Asset structure
@@ -30,6 +33,14 @@ namespace LTB {
 
     struct TextureAsset : Asset{
         Texture2D Data;
+    };
+
+    struct ModelAsset : Asset {
+        Model Data;
+    };
+
+    struct SpriteAsset : Asset {
+        Sprite Data;
     };
 
     struct SceneAsset : Asset {
@@ -61,6 +72,24 @@ namespace LTB {
         {
             auto asset = CreateRef<SceneAsset>();
             asset->Type = AssetType::SCENE;
+            Add(uid, source, asset);
+            return asset;
+        }
+
+        inline auto AddModel(AssetID uid, const std::string& source)
+        {
+            auto asset = CreateRef<ModelAsset>();
+            asset->Data = LoadModel(source.c_str());
+            asset->Type = AssetType::MODEL;
+            Add(uid, source, asset);
+            return asset;
+        }
+
+        inline auto AddSprite(AssetID uid, const std::string& source)
+        {
+            auto asset = CreateRef<SpriteAsset>();
+            asset->Data.Texture = LoadTexture(source.c_str());
+            asset->Type = AssetType::SPRTIE;
             Add(uid, source, asset);
             return asset;
         }

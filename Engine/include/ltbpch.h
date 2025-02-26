@@ -76,4 +76,5 @@ _UCRT_RESTORE_CLANG_WARNINGS
 #include <filesystem>
 #include <cassert>
 #include <raylib.h>
+#include <raymath.h>
 #include <rlImGui.h>

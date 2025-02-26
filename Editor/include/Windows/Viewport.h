@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorLayer.h"
 #include "FA.h"
+#include <ImGuizmo.h>
 
 namespace LTB {
     class ViewportWindow : public IWidget {
@@ -71,16 +72,28 @@ namespace LTB {
                     
                 }
 
+                //gizmo
+                ImGuizmo::SetOrthographic(false);
+			    ImGuizmo::SetDrawlist();
+
+			    ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+
+                ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+				(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
+				nullptr, snap ? snapValues : nullptr);
+
+                ImGuizmo::Manipulate(Application::Get().GetRenderer().GetCam().fovy, Application::Get().GetRenderer().GetCam().projection, ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, MatrixTrace(mSelected.Get<ModelComponent>().mModel.transform) );
+
                 // context->m_ViewportFocused = ImGui::IsWindowFocused();
             }
             ImGui::End();
             ImGui::PopStyleVar();
         }
 
-        // inline void OnSelect(Entity entity) override
-        // {
-
-        // }
+        inline void OnSelect(Entity entity) override
+        {
+            mSelected = entity;
+        }
 
     private:
         ImTextureID m_Frame;
@@ -89,5 +102,6 @@ namespace LTB {
         ImVec2 m_ViewportBounds[2];
         ImVec2 m_ViewportSize;
         bool m_ViewportFocused = false, m_ViewportHovered = false;
+        Entity mSelected;
     };
 }
