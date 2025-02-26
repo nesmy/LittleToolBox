@@ -19,10 +19,13 @@ namespace LTB {
         void EndCam();
 
         void SwitchCam();
+
+        void BlockUpdate(bool update);
     private:
         Scope<Framebuffer> mBuffer;
         Camera3D mGlobalCam = {0};
         Camera2D mGlobalCam2D = {0};
         bool Switch2d;
+        bool StopUpdate;
     };
 }

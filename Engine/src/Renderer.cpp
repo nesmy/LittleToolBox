@@ -13,6 +13,7 @@ namespace LTB {
         mGlobalCam.projection = CAMERA_PERSPECTIVE;
 
         Switch2d = false;
+        StopUpdate = false;
     }
 
     Renderer::~Renderer(){
@@ -21,7 +22,8 @@ namespace LTB {
 
     void Renderer::Update(){
         mBuffer->Resize();
-        UpdateCamera(&mGlobalCam, CAMERA_FREE);
+        if(StopUpdate == false)
+            UpdateCamera(&mGlobalCam, CAMERA_FREE);
     }
 
     void Renderer::GlobalCam(){
@@ -47,5 +49,9 @@ namespace LTB {
             Switch2d = false;
         else if (Switch2d == false)
             Switch2d = true;
+    }
+
+    void Renderer::BlockUpdate(bool update){
+        StopUpdate = update;
     }
 }
