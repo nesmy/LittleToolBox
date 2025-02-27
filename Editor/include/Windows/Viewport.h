@@ -1,7 +1,10 @@
 #pragma once
 #include "EditorLayer.h"
 #include "FA.h"
+#include "Math/LTBMath.h"
 #include <ImGuizmo.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace LTB {
     class ViewportWindow : public IWidget {
@@ -10,6 +13,7 @@ namespace LTB {
         {
             // m_Frame = (ImTextureID)context->GetSceneFrame();
             mPlay = LoadTexture("Resources/Icons/PlayButton.png");
+            viewportRect = {0,0, (float)GetScreenWidth(), (float)GetScreenHeight()};
         }
 
         inline void OnShow(EditorLayer* context) override
@@ -33,6 +37,11 @@ namespace LTB {
 
                 ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
                 m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+
+                if (m_ViewportSize.x > 0 && m_ViewportSize.y > 0) {
+                        viewportRect.width = m_ViewportSize.x;
+                        viewportRect.height = m_ViewportSize.y;
+                }
                 //-------------------------------------
 
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
@@ -72,19 +81,113 @@ namespace LTB {
                     
                 }
 
-                //gizmo
-                ImGuizmo::SetOrthographic(false);
-			    ImGuizmo::SetDrawlist();
+                //gizmo3D
+                if(!Application::Get().GetRenderer().Is2D()){
+                    Inputs();
+                    auto& camera = Application::Get().GetRenderer().GetCam();
+                    ray = GetMouseRay({ImGui::GetMousePos().x, ImGui::GetMousePos().y}, camera);
+                    if(ImGui::IsItemHovered() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+                        
+                        ImVec2 mousePos = ImGui::GetMousePos();
+                        ImVec2 viewportPos = ImGui::GetItemRectMin();  // Top-left of viewport in screen space
 
-			    ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+                        Vector2 adjustedMousePos = { 
+                            mousePos.x - viewportPos.x,  // Convert to viewport-local coordinates
+                            mousePos.y - viewportPos.y
+                        };
+                        mSelected = PickObject(camera);
+                    }
+                    float matrix[16];                
 
-                ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-				(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
-				nullptr, snap ? snapValues : nullptr);
 
-                ImGuizmo::Manipulate(Application::Get().GetRenderer().GetCam().fovy, Application::Get().GetRenderer().GetCam().projection, ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, MatrixTrace(mSelected.Get<ModelComponent>().mModel.transform) );
+                    Matrix view = GetCameraMatrix(camera);
+                    Matrix projection = MatrixPerspective(DEG2RAD * camera.fovy, (m_ViewportBounds[1].x - m_ViewportBounds[0].x) / (m_ViewportBounds[1].y - m_ViewportBounds[0].y), 0.01f, 1000.0f);                
+                    // Snapping
+                    bool snap = IsKeyPressed(KEY_LEFT_CONTROL);
+                    float snapValue = 0.5f; // Snap to 0.5m for translation/scale
+                    // Snap to 45 degrees for rotation
+                    if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+                        snapValue = 45.0f;
+
+                    float snapValues[3] = { snapValue, snapValue, snapValue };
+
+                    if(mSelected != NENTT){
+                        Application::Get().EnttView<Entity, ModelComponent>([this,&snap, &snapValues, &matrix, &view, &projection] (auto& entity, auto& comp) {
+                            if(mSelected.ID() == entity.ID()){
+                                auto& transform = entity.template Get<TransformComponent>().Transforms;
+                                auto& name = entity.template Get<InfoComponent>().Name;
+                                Matrix worldMatrix = GetTransformMatrix(transform.translation, transform.rotation, transform.scale);
+                                memcpy(matrix, MatrixToFloatV(MatrixTranspose(worldMatrix)).v, sizeof(matrix));
+                                ImGuizmo::SetOrthographic(false);
+                                ImGuizmo::SetDrawlist();
+
+                                ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);                            
+                                ImGuizmo::Manipulate(MatrixToFloatV(view).v, 
+                                                    MatrixToFloatV(projection).v, 
+                                                    (ImGuizmo::OPERATION)m_GizmoType, 
+                                                    ImGuizmo::WORLD, matrix                                               
+                                                    );
+
+                                // Matrix updatedMatrix = MatrixTranspose(*(Matrix*)matrix);
+                                // Matrix updatedMatrix = MatrixTranspose(Matrix{ matrix[0], matrix[1], matrix[2], matrix[3],
+                                //                                 matrix[4], matrix[5], matrix[6], matrix[7],
+                                //                                 matrix[8], matrix[9], matrix[10], matrix[11],
+                                //                                 matrix[12], matrix[13], matrix[14], matrix[15] });
+                                // // MatrixDecompose(updatedMatrix, &transform.translation, &transform.rotation, &transform.scale);
+                                // // Extract new translation, rotation, and scale
+                                // Vector3 newTranslation, newScale;
+                                // Quaternion newRotation;
+                                // MatrixDecompose(updatedMatrix, &newTranslation, &newRotation, &newScale);
+                                // transform.translation = newTranslation;
+                                // transform.rotation = newRotation;
+                                // transform.scale = newScale;
+                                LTB_INFO("{}", name);
+                            }
+                        });
+                    }
+                }else{
+                    auto& camera = Application::Get().GetRenderer().GetCam2D();
+                    if(ImGui::IsItemHovered() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+                        mSelected = PickObject(camera);
+                        LTB_INFO("clik");
+                    }
+
+                    Matrix view = GetCameraMatrix2D(camera);
+                    Matrix projection = MatrixOrtho(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y, 1.0, 10.0f);
+
+                    float matrix[16];
+
+                    if(mSelected != NENTT){
+                        Application::Get().EnttView<Entity, SpriteComponent>([this,&matrix, &view, &projection] (auto entity, auto& comp) {
+                            if(mSelected.ID() == entity.ID()){
+                                auto& transform = entity.template Get<TransformComponent>().Transforms;
+                                auto& name = entity.template Get<InfoComponent>().Name;
+                                Matrix worldMatrix = GetTransformMatrix(transform.translation, transform.rotation, transform.scale);
+                                memcpy(matrix, MatrixToFloatV(MatrixTranspose(worldMatrix)).v, sizeof(matrix));
+                                ImGuizmo::SetOrthographic(false);
+                                ImGuizmo::SetDrawlist();
+
+                                ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);                            
+                                ImGuizmo::Manipulate(MatrixToFloatV(view).v, 
+                                                    MatrixToFloatV(projection).v, 
+                                                    (ImGuizmo::OPERATION)m_GizmoType, 
+                                                    ImGuizmo::WORLD, matrix                                               
+                                                    );
+
+                                LTB_INFO("{}", name);
+                            }
+
+                            if(CheckCollisionPointRec({ImGui::GetMousePos().x, ImGui::GetMousePos().y}, comp.mSprite.Box)){
+                                // entityID = entity;
+                                LTB_INFO("RECT2");
+                            }
+                        });
+                    }
+                    
+                }
 
                 // context->m_ViewportFocused = ImGui::IsWindowFocused();
+                DrawRay(ray, MAROON);
             }
             ImGui::End();
             ImGui::PopStyleVar();
@@ -94,14 +197,125 @@ namespace LTB {
         {
             mSelected = entity;
         }
+        
+        inline Entity PickObject(Camera3D camera){
+            
+            Entity entityID;            
+            RayCollision collision = {0};
+            collision.distance = FLT_MAX;
+            collision.hit = false;
+            
+            Application::Get().EnttView<Entity, ModelComponent>([this, &collision, &entityID] (auto& entity, auto& comp) {
+                
+                RayCollision boxHitInfo = GetRayCollisionBox(ray, comp.Box);
+
+                if((boxHitInfo.hit) && (boxHitInfo.distance < collision.distance)){
+                    collision = boxHitInfo;
+                    entityID = entity;
+                    // Check ray collision against model meshes
+                    RayCollision meshHitInfo = { 0 };
+                    for (int m = 0; m < comp.mModel.meshCount; m++)
+                    {
+                        // NOTE: We consider the model.transform for the collision check but 
+                        // it can be checked against any transform Matrix, used when checking against same
+                        // model drawn multiple times with multiple transforms
+                        meshHitInfo = GetRayCollisionMesh(ray, comp.mModel.meshes[m], comp.mModel.transform);
+                        if (meshHitInfo.hit)
+                        {
+                            // Save the closest hit mesh
+                            if ((!collision.hit) || (collision.distance > meshHitInfo.distance)) collision = meshHitInfo;
+                            
+                            break;  // Stop once one mesh collision is detected, the colliding mesh is m
+                        }
+                    }
+
+                    if (meshHitInfo.hit)
+                    {
+                        collision = meshHitInfo;
+                        entityID = entity;                        
+                    }
+                }
+            });
+            return entityID;
+        }
+
+        inline Entity PickObject(Camera2D camera){
+            Entity entityID;
+            Application::Get().EnttView<Entity, SpriteComponent>([this, &entityID] (auto& entity, auto& comp) {
+                if(CheckCollisionPointRec(GetMousePosition(), comp.mSprite.Box)){
+                    entityID = entity;
+                    LTB_INFO("RECT");
+                }
+            });
+            return entityID;
+        }
+
+        Matrix GetTransformMatrix(Vector3 position, Quaternion rotation, Vector3 scale) {
+            Matrix translation = MatrixTranslate(position.x, position.y, position.z);
+            Matrix rotationMat = QuaternionToMatrix(rotation);
+            Matrix scaleMat = MatrixScale(scale.x, scale.y, scale.z);
+            return MatrixMultiply(MatrixMultiply(translation, rotationMat), scaleMat);
+        }
+
+        void MatrixDecompose(Matrix mat, Vector3 *outTranslation, Quaternion *outRotation, Vector3 *outScale) {
+            outTranslation->x = mat.m12;
+            outTranslation->y = mat.m13;
+            outTranslation->z = mat.m14;
+
+            outScale->x = Vector3Length(Vector3{ mat.m0, mat.m1, mat.m2 });
+            outScale->y = Vector3Length(Vector3{ mat.m4, mat.m5, mat.m6 });
+            outScale->z = Vector3Length(Vector3{ mat.m8, mat.m9, mat.m10 });
+
+            Matrix rotationMatrix = mat;
+            rotationMatrix.m0 /= outScale->x;
+            rotationMatrix.m1 /= outScale->x;
+            rotationMatrix.m2 /= outScale->x;
+            rotationMatrix.m4 /= outScale->y;
+            rotationMatrix.m5 /= outScale->y;
+            rotationMatrix.m6 /= outScale->y;
+            rotationMatrix.m8 /= outScale->z;
+            rotationMatrix.m9 /= outScale->z;
+            rotationMatrix.m10 /= outScale->z;
+
+            *outRotation = QuaternionFromMatrix(rotationMatrix);
+        }
+
+        inline void Inputs(){
+            
+            bool control = IsKeyPressed(KEY_LEFT_CONTROL) || IsKeyPressed(KEY_RIGHT_CONTROL);
+            bool shift = IsKeyPressed(KEY_LEFT_SHIFT) || IsKeyPressed(KEY_RIGHT_SHIFT);
+
+            // Gizmos			
+            if(!ImGuizmo::IsUsing() && IsKeyPressed(KEY_Z)){
+                m_GizmoType = -1;
+            }
+            if(!ImGuizmo::IsUsing() && IsKeyPressed(KEY_T)){
+                m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+            }
+            if(!ImGuizmo::IsUsing() && IsKeyPressed(KEY_R)){
+                m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+            }
+            if(!ImGuizmo::IsUsing() && IsKeyPressed(KEY_C)){
+                m_GizmoType = ImGuizmo::OPERATION::SCALE;
+            }
+        }
 
     private:
         ImTextureID m_Frame;
         ImVec2 m_Viewport;
         Texture mPlay;
+        Ray ray = {0};
         ImVec2 m_ViewportBounds[2];
         ImVec2 m_ViewportSize;
+        Rectangle viewportRect;
         bool m_ViewportFocused = false, m_ViewportHovered = false;
         Entity mSelected;
+        int m_GizmoType = -1;
+
+		enum class SceneState
+		{
+			Edit = 0, Play = 1
+		};
+		SceneState m_SceneState = SceneState::Edit;
     };
 }

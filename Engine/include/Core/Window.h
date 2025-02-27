@@ -9,6 +9,7 @@ namespace LTB{
 
         inline bool Init(int width, int height, const char* title){
             InitWindow(width, height, title);
+            
             SetTargetFPS(144);
             SetExitKey(KEY_NULL);    
             mClose = false;        

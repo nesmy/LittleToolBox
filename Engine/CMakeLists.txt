@@ -28,16 +28,20 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Auxiliaries
     ${CMAKE_SOURCE_DIR}/Vendor/raylib/src    
     ${CMAKE_SOURCE_DIR}/Vendor/entt/src
+    ${CMAKE_SOURCE_DIR}/Vendor/glm
     ${CMAKE_SOURCE_DIR}/Vendor/imgui
     ${CMAKE_SOURCE_DIR}/Vendor/rImGui
     ${CMAKE_SOURCE_DIR}/Vendor/imgui/backends
     ${CMAKE_SOURCE_DIR}/Vendor/spdlog/include
     ${CMAKE_SOURCE_DIR}/Vendor/ImGuizmo
+    # ${CMAKE_SOURCE_DIR}/Vendor/raygizmo/include
+    ${CMAKE_SOURCE_DIR}/Vendor/raylib/src
 )
 
 # link libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
     raylib 
+    glm
     spdlog   
     EnTT
     imgui

@@ -2,6 +2,11 @@
 
 #include "Config.h"
 #include "Data.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
 namespace LTB {
 
@@ -17,6 +22,50 @@ namespace LTB {
         inline TransformComponent(const TransformComponent&) = default;
         inline TransformComponent() = default; 
         Transform Transforms;
+        glm::mat4 GetTransform() const
+		{
+            auto& RayRoation = QuaternionToEuler(Transforms.rotation);
+            auto& RayTranslation = Transforms.translation;
+            auto& RayScale = Transforms.scale;
+			glm::mat4 rotation = glm::toMat4(glm::quat({0,0,0}));
+
+			return glm::translate(glm::mat4(1.0f), {RayTranslation.x, RayTranslation.y, RayTranslation.z})
+				* rotation
+				* glm::scale(glm::mat4(1.0f), {RayScale.x, RayScale.y, RayScale.z});
+		}
+
+        // Matrix GetMatrix() const{
+        //     Matrix translation = MatrixTranslate(Transforms.translation.x, Transforms.translation.y, Transforms.translation.z);
+        //     Matrix rotationMat = QuaternionToMatrix(Transforms.rotation);
+        //     Matrix scaleMat = MatrixScale(Transforms.scale.x, Transforms.scale.y, Transforms.scale.z);
+        //     return MatrixMultiply(MatrixMultiply(translation, rotationMat), scaleMat);
+        // }
+
+        Matrix GetMatrix(){
+            //Temporary transform matrix
+            Matrix _tfMatrix = MatrixIdentity();	//transformMatrix
+
+            //Matrix scale (in local space)
+            Matrix _scMatrix = MatrixScale(Transforms.scale.x, Transforms.scale.y, Transforms.scale.z); //scaleMatrix
+            _tfMatrix = MatrixMultiply(_tfMatrix, _scMatrix);	//applyScale
+
+            //Convert Quaternion to rotation matrix
+            Matrix _rtMatrix = QuaternionToMatrix(Transforms.rotation);	//rotationMatrix
+
+            //matrix rotation
+            Matrix _trMatrix = MatrixIdentity();	//translationMatrix
+            if (Transforms.translation.x != 0 || Transforms.translation.y != 0 || Transforms.translation.z != 0)
+                _trMatrix = MatrixTranslate(Transforms.translation.x, Transforms.translation.y, Transforms.translation.z);
+
+            //Finalize transform
+            _tfMatrix = MatrixMultiply(_tfMatrix, _rtMatrix);	//applyRotation
+            _tfMatrix = MatrixMultiply(_tfMatrix, _trMatrix);	//applyTransform
+
+            //this->_model.transform = _tfMatrix;
+            
+            return _tfMatrix;
+        }
+
     };
 
     // camera component
@@ -40,6 +89,8 @@ namespace LTB {
         inline ModelComponent(const ModelComponent&) = default;
         inline ModelComponent() = default; 
         Model mModel;
+        BoundingBox Box;
+        Color color;
     };
 
     // sprite component

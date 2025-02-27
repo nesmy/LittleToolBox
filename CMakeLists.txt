@@ -24,6 +24,7 @@ project(LittleToolBox)
 # vendor
 
 add_subdirectory(Vendor/raylib)
+add_subdirectory(Vendor/glm)
 add_subdirectory(Vendor/spdlog)
 add_subdirectory(Vendor/imgui)
 add_subdirectory(Vendor/rImGui)
@@ -33,3 +34,4 @@ add_subdirectory(Vendor/entt)
 
 add_subdirectory(Engine)
 add_subdirectory(Editor)
+# add_subdirectory(Test)

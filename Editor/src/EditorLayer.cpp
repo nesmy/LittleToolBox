@@ -35,15 +35,26 @@ namespace LTB {
 
         auto test = Application::Get().CreateEntt<Entity>();
         test.Attach<InfoComponent>().Name = "Test";
-        test.Attach<TransformComponent>();
-        test.Attach<ModelComponent>().mModel = model1->Data;
+        test.Attach<TransformComponent>();         
+        auto& mod = test.Attach<ModelComponent>();
+        mod.mModel = model1->Data;
+        mod.Box = GetMeshBoundingBox(mod.mModel.meshes[0]);
+
+        auto test2 = Application::Get().CreateEntt<Entity>();
+        test2.Attach<InfoComponent>().Name = "Test2";
+        test2.Attach<TransformComponent>().Transforms.translation.x = -10;
+        auto& mod2 = test2.Attach<ModelComponent>();
+        mod2.mModel = model1->Data;
+        mod2.Box = GetMeshBoundingBox(mod2.mModel.meshes[0]);
 
         auto test1 = Application::Get().CreateEntt<Entity>();
         test1.Attach<InfoComponent>().Name = "Test1";
-        auto ts = test1.Attach<TransformComponent>().Transforms;
-        test1.Attach<SpriteComponent>().mSprite.Texture = asset1->Data;
-        ts.translation.x = 100;
-        ts.translation.y = 100;
+        auto& ts = test1.Attach<TransformComponent>().Transforms;
+        auto& sprite = test1.Attach<SpriteComponent>().mSprite;
+        sprite.Texture = asset1->Data;
+        ts.translation.x = 10;
+        sprite.Box = {ts.translation.x, ts.translation.y, (float)(sprite.Texture.width + 5), (float)(sprite.Texture.height + 5)};
+        // ts.translation.y = 100;
     }
 
     void EditorLayer::OnDetach(){
