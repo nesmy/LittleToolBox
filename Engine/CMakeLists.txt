@@ -23,6 +23,7 @@ set_source_files_properties(${ImGuizmoH}
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Core
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/Scene
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Renderer
     ${CMAKE_CURRENT_SOURCE_DIR}/include/ImGui
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Auxiliaries
@@ -34,6 +35,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_SOURCE_DIR}/Vendor/imgui/backends
     ${CMAKE_SOURCE_DIR}/Vendor/spdlog/include
     ${CMAKE_SOURCE_DIR}/Vendor/ImGuizmo
+    ${CMAKE_SOURCE_DIR}/Vendor/yaml-cpp/include
     # ${CMAKE_SOURCE_DIR}/Vendor/raygizmo/include
     ${CMAKE_SOURCE_DIR}/Vendor/raylib/src
 )
@@ -46,6 +48,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     EnTT
     imgui
     rImGui    
+    yaml-cpp
 )
 
 

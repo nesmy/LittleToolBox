@@ -11,8 +11,7 @@ namespace LTB{
 
         sInstance = this;
         mWindow = CreateScope<Window>();
-        mWindow->Init(1600, 960, "Hello Window");
-        mRenderer = CreateScope<Renderer>();
+        mWindow->Init(1600, 960, "Hello Window");        
         mAssets = CreateScope<AssetRegistry>();
 
         mImGuiLayer = new ImGuiLayer();
@@ -34,36 +33,24 @@ namespace LTB{
     }
 
     void Application::Run(){
-
+        float DeltaTime = GetFrameTime();
         
         while(mWindow->ShouldClose()){
-            Update();
-            Render();
+            mDispatcher.PollEvents(); 
+            for(Layer* layer : mLayerStack){
+                layer->OnUpdate(DeltaTime);
+            }
+            BeginDrawing();
+            ClearBackground(BLACK);        
+
+            mImGuiLayer->Begin();
+            {
+                for(Layer* layer: mLayerStack)
+                    layer->OnImGuiRender();
+            }
+            mImGuiLayer->End();
+            EndDrawing();
         }
     }
 
-    void Application::Update(){
-        mDispatcher.PollEvents();
-        mRenderer->Update();        
-    }
-
-    void Application::Render(){
-        BeginDrawing();
-        ClearBackground(BLACK);
-
-        mRenderer->GetBuffer()->Bind();
-        mRenderer->GlobalCam();
-        ClearBackground(RED);
-        mRenderer->Render();
-        mRenderer->EndCam();
-        mRenderer->GetBuffer()->Unbind();
-
-        mImGuiLayer->Begin();
-        {
-            for(Layer* layer: mLayerStack)
-                layer->OnImGuiRender();
-        }
-        mImGuiLayer->End();
-        EndDrawing();
-    }
 }

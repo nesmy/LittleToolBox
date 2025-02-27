@@ -29,6 +29,10 @@ add_subdirectory(Vendor/spdlog)
 add_subdirectory(Vendor/imgui)
 add_subdirectory(Vendor/rImGui)
 add_subdirectory(Vendor/entt)
+set(YAML_CPP_BUILD_CONTRIB OFF)
+set(YAML_CPP_BUILD_TOOLS OFF)
+set(YAML_CPP_BUILD_TESTS OFF)
+add_subdirectory(Vendor/yaml-cpp)
 
 # project subdirectories
 

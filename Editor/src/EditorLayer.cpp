@@ -5,7 +5,7 @@
 #include "Hierarchy.h"
 #include "Viewport.h"
 #include "Resource.h"
-
+#include "SceneSerializer.h"
 #include <ImGuizmo.h>
 
 namespace LTB {
@@ -16,8 +16,11 @@ namespace LTB {
     void EditorLayer::OnAttach(){
         Application::Get().AttachCallback<SelectEvent>([this] (auto e){
             for(auto& window : mWindows)
-                window->OnSelect(Application::Get().ToEntt<Entity>(e.EnttID));
+                window->OnSelect(mActiveScene->ToEntt<Entity>(e.EnttID));
         });
+
+        mActiveScene = CreateRef<Scene>();
+        mBuffer = CreateScope<Framebuffer>(GetScreenWidth(), GetScreenHeight());
 
         OnGuiStart();
 
@@ -27,42 +30,57 @@ namespace LTB {
         auto asset3 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
         auto model1 = Application::Get().GetAssets().AddModel(RandomU64(), "Resources/Models/sphere.obj");
 
+        SceneSerializer serializer(mActiveScene);
+        serializer.Deserialize("Resources/Saves/test.data");
+
         // auto cam = Application::Get().CreateEntt<Entity>();
         // cam.Attach<InfoComponent>().Name = "Cam";
         // cam.Attach<CameraComponent>();
         // auto& camTs = cam.Attach<TransformComponent>().Transforms;
         // camTs.translation = Vector3{0.0f};
-
-        auto test = Application::Get().CreateEntt<Entity>();
-        test.Attach<InfoComponent>().Name = "Test";
-        test.Attach<TransformComponent>();         
+#if 0
+        auto test = mActiveScene->CreateEntity("Test");
         auto& mod = test.Attach<ModelComponent>();
         mod.mModel = model1->Data;
         mod.Box = GetMeshBoundingBox(mod.mModel.meshes[0]);
 
-        auto test2 = Application::Get().CreateEntt<Entity>();
-        test2.Attach<InfoComponent>().Name = "Test2";
-        test2.Attach<TransformComponent>().Transforms.translation.x = -10;
+        auto test2 = mActiveScene->CreateEntity("Test1");
+        test2.Get<TransformComponent>().Transforms.translation.x = -10;
         auto& mod2 = test2.Attach<ModelComponent>();
         mod2.mModel = model1->Data;
         mod2.Box = GetMeshBoundingBox(mod2.mModel.meshes[0]);
 
-        auto test1 = Application::Get().CreateEntt<Entity>();
-        test1.Attach<InfoComponent>().Name = "Test1";
-        auto& ts = test1.Attach<TransformComponent>().Transforms;
+        auto test1 = mActiveScene->CreateEntity("Test2");
+        auto& ts = test1.Get<TransformComponent>().Transforms;
         auto& sprite = test1.Attach<SpriteComponent>().mSprite;
         sprite.Texture = asset1->Data;
         ts.translation.x = 10;
         sprite.Box = {ts.translation.x, ts.translation.y, (float)(sprite.Texture.width + 5), (float)(sprite.Texture.height + 5)};
         // ts.translation.y = 100;
+#endif
     }
 
     void EditorLayer::OnDetach(){
 
     }
 
-    void EditorLayer::OnUpdate(){
-
+    void EditorLayer::OnUpdate(float deltaTime){
+        mBuffer->Resize();
+        mBuffer->Bind();
+        ClearBackground(GREEN);
+        switch(mSceneState){
+            case SceneState::Edit:
+            {
+                mActiveScene->OnUpdateEditor(deltaTime);
+                break;
+            }
+            case SceneState::Play:
+            {
+                mActiveScene->OnUpdateRuntime(deltaTime);
+                break;
+            }
+        }
+        mBuffer->Unbind();
     }
 
     void EditorLayer::OnImGuiRender(){
@@ -125,4 +143,10 @@ namespace LTB {
     void EditorLayer::OnGuiFrame(){
 
     }
+
+    void EditorLayer::SerializeScene(Ref<Scene> scene, const std::filesystem::path& path)
+	{
+		SceneSerializer serializer(scene);
+		serializer.Serialize(path.string());
+	}
 }

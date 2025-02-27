@@ -16,7 +16,7 @@ namespace LTB {
 		{
 			if(ImGui::Begin(ICON_FA_CUBES "\tHierarchy"))
 			{
-				Application::Get().EnttView<Entity, InfoComponent>([&] (auto entity, auto& info)
+				context->GetActiveScene().EnttView<Entity, InfoComponent>([&] (auto entity, auto& info)
 				{
 					// check if current entity is selected
 					bool isSelected = (mSelected.ID() == entity.ID());
@@ -30,14 +30,14 @@ namespace LTB {
 					// special label with icons
 					// if(entity.template Has<DirectLightComponent>())
 					// 	label = ICON_FA_SUN "\t" + info.Name;
-					// if(entity.template Has<CameraComponent>())
-					// 	label = ICON_FA_VIDEO "\t" + info.Name;
+					if(entity.template Has<CameraComponent>())
+						label = ICON_FA_VIDEO "\t" + info.Name;
 					// if(entity.template Has<RigidBodyComponent>())
 					// 	label = ICON_FA_PERSON "\t" + info.Name;
 					// if(entity.template Has<SkyboxComponent>())
 					// 	label = ICON_FA_CLOUD_SUN_RAIN "\t" + info.Name;
-					// if(entity.template Has<Camera2DComponent>())
-					//     label = ICON_FA_VIDEO "\t" + info.Name;
+					if(entity.template Has<Camera2DComponent>())
+					    label = ICON_FA_VIDEO "\t" + info.Name;
 
 					// show entity selectable
 					if(ImGui::Selectable(label.c_str(), &isSelected))
@@ -63,11 +63,11 @@ namespace LTB {
 						{
 							if (ImGui::MenuItem(ICON_FA_FORWARD " Add Camera"))
 							{
-								// entity.template Attach<CameraComponent>();
+								entity.template Attach<CameraComponent>();
 							}
 							if (ImGui::MenuItem(ICON_FA_FORWARD " Add Camera2D"))
 							{
-								// entity.template Attach<Camera2DComponent>();
+								entity.template Attach<Camera2DComponent>();
 							}
 							if(ImGui::MenuItem(ICON_FA_FORWARD " Add DirectLight"))
 							{

@@ -1,13 +1,11 @@
 #include "ltbpch.h"
-#include "Renderer/Renderer.h"
-#include "Application.h"
+#include "Scene.h"
 #include "ECS.h"
-#include "rlgl.h"
+#include "Application.h"
 
 namespace LTB {
 
-    Renderer::Renderer(){
-        mBuffer = CreateScope<Framebuffer>(GetScreenWidth(), GetScreenHeight());
+    Scene::Scene(){        
 
         mGlobalCam.position = Vector3{1.0f, 1.0f, 1.0f};
         mGlobalCam.target = Vector3{4.0f, 1.0f, 4.0f};
@@ -18,48 +16,66 @@ namespace LTB {
         mGlobalCam2D.zoom = 1.0f;
 
         Switch2d = false;
-        StopUpdate = false;                
+    }
+    Scene::~Scene(){}
+
+    Ref<Scene> Scene::Copy(Ref<Scene> other){
+        Ref<Scene> newScene = CreateRef<Scene>();
+
+        return newScene;
     }
 
-    Renderer::~Renderer(){
+    Entity Scene::CreateEntity(const std::string& name){
 
+        return CreateEntityWithUUID(UUID(), name);
     }
 
-    void Renderer::Update(){
-        mBuffer->Resize();
+    Entity Scene::CreateEntityWithUUID(UUID uuid,const std::string& name){
+
+        Entity entity = CreateEntt<Entity>();
+        entity.Attach<IDComponent>(uuid);
+        auto& tag = entity.Attach<InfoComponent>().Name;
+        tag = name.empty() ? "Entity" : name;
+        entity.Attach<TransformComponent>();
+
+        return entity;
+    }
+
+    void Scene::DestroyEntity(Entity entity){
+        entity.Destroy();
+    }
+
+    void Scene::OnRuntimeStart(){}
+    void Scene::OnRuntimeStop() {}
+
+    void Scene::OnUpdateRuntime(float deltaTime) {}
+    void Scene::OnUpdateEditor(float deltaTime) {   
         if(StopUpdate == false)
-            UpdateCamera(&mGlobalCam, CAMERA_FREE);
-    }
-
-
-    void Renderer::Render(){
-
-        // Display information about closest hit
-        RayCollision collision = { 0 };
-        char *hitObjectName = "None";
-        collision.distance = FLT_MAX;
-        collision.hit = false;
-        Color cursorColor = WHITE;
-
+            UpdateCamera(&mGlobalCam, CAMERA_FREE);    
+        GlobalCam();
+        ClearBackground(RED);
         // Get ray and test against objects        
         ray = GetMouseRay(GetMousePosition(), mGlobalCam);
 
-        Application::Get().EnttView<Entity, ModelComponent>([this] (auto entity, auto& comp){
+        EnttView<Entity, ModelComponent>([this] (auto entity, auto& comp){
             auto& transform = entity.template Get<TransformComponent>().Transforms;                        
             DrawModel(comp.mModel,transform.translation , 1.0f, WHITE);
             DrawBoundingBox(comp.Box, LIME);
         });
 
-        Application::Get().EnttView<Entity, SpriteComponent>([this] (auto entity, auto& comp){
+        EnttView<Entity, SpriteComponent>([this] (auto entity, auto& comp){
             auto& transform = entity.template Get<TransformComponent>().Transforms;
             DrawRectangleRec(comp.mSprite.Box, GREEN);
             DrawTextureV(comp.mSprite.Texture, {transform.translation.x, transform.translation.y}, WHITE);
             // LTB_CORE_INFO("x: {}, y: {}",transform.translation.x, transform.translation.y);
         });
         DrawGrid(10, 1.0);
+        EndCam();
     }
 
-    void Renderer::GlobalCam(){
+    void Scene::DuplicateEntity(Entity entity){}
+
+    void Scene::GlobalCam(){
         if(Switch2d){
             BeginMode2D(mGlobalCam2D);
         }
@@ -68,7 +84,7 @@ namespace LTB {
         }
     }
 
-    void Renderer::EndCam(){
+    void Scene::EndCam(){
         if(Switch2d){
             EndMode2D();
         }
@@ -77,14 +93,14 @@ namespace LTB {
         }
     }
 
-    void Renderer::SwitchCam(){
+    void Scene::SwitchCam(){
         if(Switch2d)
             Switch2d = false;
         else if (Switch2d == false)
             Switch2d = true;
     }
 
-    void Renderer::BlockUpdate(bool update){
+    void Scene::BlockUpdate(bool update){
         StopUpdate = update;
     }
 }

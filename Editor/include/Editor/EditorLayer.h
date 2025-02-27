@@ -2,6 +2,8 @@
 
 #include "Layer.h"
 #include "Widget.h"
+#include "Scene.h"
+#include "Framebuffer.h"
 
 namespace LTB {
 
@@ -12,12 +14,15 @@ namespace LTB {
 
         void OnAttach() override;
         void OnDetach() override;
-        void OnUpdate() override;
+        void OnUpdate(float deltaTime) override;
         void OnImGuiRender() override;
 
         virtual void OnGuiStart();
         virtual void OnGuiFrame();
 
+        void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
+
+    public:
         template<typename T, typename... Args>
         inline void AttachWindow(Args&&... args)
         {
@@ -33,7 +38,24 @@ namespace LTB {
             auto widget = std::make_unique<T>(this, std::forward<Args>(args)...);
             return widget;
         }
+
+        inline const Scope<Framebuffer>& GetBuffer() const {
+            return mBuffer;
+        }
+
+        inline Scene& GetActiveScene() { return *mActiveScene;}
+        inline Ref<Scene>& GetActiveSceneRef() { return mActiveScene;}
+        //temp
+        std::filesystem::path mEditorScenePath;
     private:
         std::vector<Widget> mWindows;
+        Ref<Scene> mActiveScene;
+
+        enum class SceneState
+		{
+			Edit = 0, Play = 1
+		};
+		SceneState mSceneState = SceneState::Edit;
+        Scope<Framebuffer> mBuffer;
     };
 }

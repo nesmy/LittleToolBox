@@ -33,7 +33,7 @@ namespace LTB {
 
                 m_ViewportFocused = ImGui::IsWindowFocused();
                 m_ViewportHovered = ImGui::IsWindowHovered();                
-                Application::Get().GetRenderer().BlockUpdate(!m_ViewportFocused && !m_ViewportHovered);
+                context->GetActiveScene().BlockUpdate(!m_ViewportFocused && !m_ViewportHovered);
 
                 ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
                 m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
@@ -69,8 +69,7 @@ namespace LTB {
                 ImGui::PopStyleColor(3);
                 ImGui::End();
                 //-----------------------------------------------
-                m_Frame = (ImTextureID)&Application::Get().GetRenderer().GetBuffer()->GetTexture().texture;
-                // rlImGuiImageRenderTextureFit(&Application::Get().GetRenderer().GetBuffer()->GetTexture(), true);
+                m_Frame = (ImTextureID)&context->GetBuffer()->GetTexture().texture;                
                 ImGui::Image(m_Frame, ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2{0, 1}, ImVec2{1,0});
 
                 // get imgui io
@@ -82,9 +81,9 @@ namespace LTB {
                 }
 
                 //gizmo3D
-                if(!Application::Get().GetRenderer().Is2D()){
+                if(!context->GetActiveScene().Is2D()){
                     Inputs();
-                    auto& camera = Application::Get().GetRenderer().GetCam();
+                    auto& camera = context->GetActiveScene().GetCam();
                     ray = GetMouseRay({ImGui::GetMousePos().x, ImGui::GetMousePos().y}, camera);
                     if(ImGui::IsItemHovered() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
                         
@@ -95,7 +94,7 @@ namespace LTB {
                             mousePos.x - viewportPos.x,  // Convert to viewport-local coordinates
                             mousePos.y - viewportPos.y
                         };
-                        mSelected = PickObject(camera);
+                        mSelected = PickObject(camera, context);
                     }
                     float matrix[16];                
 
@@ -112,11 +111,11 @@ namespace LTB {
                     float snapValues[3] = { snapValue, snapValue, snapValue };
 
                     if(mSelected != NENTT){
-                        Application::Get().EnttView<Entity, ModelComponent>([this,&snap, &snapValues, &matrix, &view, &projection] (auto& entity, auto& comp) {
+                        context->GetActiveScene().EnttView<Entity, ModelComponent>([this,&snap, &snapValues, &matrix, &view, &projection] (auto& entity, auto& comp) {
                             if(mSelected.ID() == entity.ID()){
                                 auto& transform = entity.template Get<TransformComponent>().Transforms;
                                 auto& name = entity.template Get<InfoComponent>().Name;
-                                Matrix worldMatrix = GetTransformMatrix(transform.translation, transform.rotation, transform.scale);
+                                Matrix worldMatrix = Math::GetTransformMatrix(transform.translation, transform.rotation, transform.scale);
                                 memcpy(matrix, MatrixToFloatV(MatrixTranspose(worldMatrix)).v, sizeof(matrix));
                                 ImGuizmo::SetOrthographic(false);
                                 ImGuizmo::SetDrawlist();
@@ -146,9 +145,9 @@ namespace LTB {
                         });
                     }
                 }else{
-                    auto& camera = Application::Get().GetRenderer().GetCam2D();
+                    auto& camera = context->GetActiveScene().GetCam2D();
                     if(ImGui::IsItemHovered() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-                        mSelected = PickObject(camera);
+                        mSelected = PickObject(camera, context);
                         LTB_INFO("clik");
                     }
 
@@ -158,11 +157,11 @@ namespace LTB {
                     float matrix[16];
 
                     if(mSelected != NENTT){
-                        Application::Get().EnttView<Entity, SpriteComponent>([this,&matrix, &view, &projection] (auto entity, auto& comp) {
+                        context->GetActiveScene().EnttView<Entity, SpriteComponent>([this,&matrix, &view, &projection] (auto entity, auto& comp) {
                             if(mSelected.ID() == entity.ID()){
                                 auto& transform = entity.template Get<TransformComponent>().Transforms;
                                 auto& name = entity.template Get<InfoComponent>().Name;
-                                Matrix worldMatrix = GetTransformMatrix(transform.translation, transform.rotation, transform.scale);
+                                Matrix worldMatrix = Math::GetTransformMatrix(transform.translation, transform.rotation, transform.scale);
                                 memcpy(matrix, MatrixToFloatV(MatrixTranspose(worldMatrix)).v, sizeof(matrix));
                                 ImGuizmo::SetOrthographic(false);
                                 ImGuizmo::SetDrawlist();
@@ -198,14 +197,14 @@ namespace LTB {
             mSelected = entity;
         }
         
-        inline Entity PickObject(Camera3D camera){
+        inline Entity PickObject(Camera3D camera, EditorLayer* context){
             
             Entity entityID;            
             RayCollision collision = {0};
             collision.distance = FLT_MAX;
             collision.hit = false;
             
-            Application::Get().EnttView<Entity, ModelComponent>([this, &collision, &entityID] (auto& entity, auto& comp) {
+            context->GetActiveScene().EnttView<Entity, ModelComponent>([this, &collision, &entityID] (auto& entity, auto& comp) {
                 
                 RayCollision boxHitInfo = GetRayCollisionBox(ray, comp.Box);
 
@@ -239,46 +238,17 @@ namespace LTB {
             return entityID;
         }
 
-        inline Entity PickObject(Camera2D camera){
+        inline Entity PickObject(Camera2D camera, EditorLayer* context){
             Entity entityID;
-            Application::Get().EnttView<Entity, SpriteComponent>([this, &entityID] (auto& entity, auto& comp) {
+            context->GetActiveScene().EnttView<Entity, SpriteComponent>([this, &entityID] (auto& entity, auto& comp) {
                 if(CheckCollisionPointRec(GetMousePosition(), comp.mSprite.Box)){
-                    entityID = entity;
-                    LTB_INFO("RECT");
+                    entityID = entity;                    
                 }
             });
             return entityID;
         }
 
-        Matrix GetTransformMatrix(Vector3 position, Quaternion rotation, Vector3 scale) {
-            Matrix translation = MatrixTranslate(position.x, position.y, position.z);
-            Matrix rotationMat = QuaternionToMatrix(rotation);
-            Matrix scaleMat = MatrixScale(scale.x, scale.y, scale.z);
-            return MatrixMultiply(MatrixMultiply(translation, rotationMat), scaleMat);
-        }
-
-        void MatrixDecompose(Matrix mat, Vector3 *outTranslation, Quaternion *outRotation, Vector3 *outScale) {
-            outTranslation->x = mat.m12;
-            outTranslation->y = mat.m13;
-            outTranslation->z = mat.m14;
-
-            outScale->x = Vector3Length(Vector3{ mat.m0, mat.m1, mat.m2 });
-            outScale->y = Vector3Length(Vector3{ mat.m4, mat.m5, mat.m6 });
-            outScale->z = Vector3Length(Vector3{ mat.m8, mat.m9, mat.m10 });
-
-            Matrix rotationMatrix = mat;
-            rotationMatrix.m0 /= outScale->x;
-            rotationMatrix.m1 /= outScale->x;
-            rotationMatrix.m2 /= outScale->x;
-            rotationMatrix.m4 /= outScale->y;
-            rotationMatrix.m5 /= outScale->y;
-            rotationMatrix.m6 /= outScale->y;
-            rotationMatrix.m8 /= outScale->z;
-            rotationMatrix.m9 /= outScale->z;
-            rotationMatrix.m10 /= outScale->z;
-
-            *outRotation = QuaternionFromMatrix(rotationMatrix);
-        }
+        
 
         inline void Inputs(){
             
@@ -310,12 +280,6 @@ namespace LTB {
         Rectangle viewportRect;
         bool m_ViewportFocused = false, m_ViewportHovered = false;
         Entity mSelected;
-        int m_GizmoType = -1;
-
-		enum class SceneState
-		{
-			Edit = 0, Play = 1
-		};
-		SceneState m_SceneState = SceneState::Edit;
+        int m_GizmoType = -1;		
     };
 }

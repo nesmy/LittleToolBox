@@ -1,5 +1,6 @@
 #pragma once
 #include "EditorLayer.h"
+#include "SceneSerializer.h"
 
 namespace LTB {
 
@@ -23,10 +24,24 @@ namespace LTB {
                     if (ImGui::MenuItem(ICON_FA_FILE " Open Project", "Ctrl+O")) {
                         // context->Deserialize(*context->GetContext()->Assets, "Resources/Projects/savedassets.yaml");
                         // context->Deserialize(context->GetContext()->Scene, "Resources/Projects/savedscene.yaml");
+                        Ref<Scene> newScene = CreateRef<Scene>();
+                        SceneSerializer serializer(newScene);
+                        if (serializer.Deserialize("Resources/Saves/test.data"))
+                        {                                                        
+                            context->mEditorScenePath = "Resources/Saves/test.data";
+
+                            context->GetActiveSceneRef() = newScene;
+                        }
                     }
                     if (ImGui::MenuItem(ICON_FA_STORE " Save Scene", "Ctrl+S")) {
                         // context->Serialize(*context->GetContext()->Assets, "Resources/Projects/savedassets.yaml");
                         // context->Serialize(context->GetContext()->Scene, "Resources/Projects/savedscene.yaml"); 
+                        std::string filepath = "Resources/Saves/test.data";
+                        if (!filepath.empty())
+                        {
+                            context->SerializeScene(context->GetActiveSceneRef(), filepath);
+                            context->mEditorScenePath = filepath;
+                        }
                     }
                     if (ImGui::MenuItem(ICON_FA_DOOR_CLOSED " Exit", "Alt+F4")) {
                         Application::Get().Close();    
@@ -37,9 +52,7 @@ namespace LTB {
                 {
                     if (ImGui::MenuItem(ICON_FA_FORWARD " Add Entity")) 
                     {
-                        auto entity = Application::Get().CreateEntt<Entity>();
-                        // entity.template Attach<TransformComponent>();
-                        entity.template Attach<InfoComponent>().Name = "New Entity";
+                        context->GetActiveScene().CreateEntity();
                     }
 
                     if (ImGui::MenuItem(ICON_FA_FORWARD " Undo", "CTRL+Z")) {}
@@ -55,7 +68,7 @@ namespace LTB {
                 {
                     if (ImGui::MenuItem(ICON_FA_PALETTE " Theme")) {}
                     if (ImGui::MenuItem("3d/2d")) {
-                        Application::Get().GetRenderer().SwitchCam();
+                        context->GetActiveScene().SwitchCam();
                     }
                     ImGui::EndMenu();
                 }

@@ -2,6 +2,7 @@
 
 #include "Config.h"
 #include "Data.h"
+#include "UUID.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -9,6 +10,11 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace LTB {
+    struct IDComponent{
+		UUID ID;
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+	};
 
     // common component
     struct InfoComponent{
@@ -72,7 +78,8 @@ namespace LTB {
     struct CameraComponent {
         inline CameraComponent(const CameraComponent&) = default;
         inline CameraComponent() = default; 
-        Camera3D Camera; 
+        Camera3D Camera;
+        bool Primary = true;
     };
 
     // camera2D component
@@ -81,6 +88,7 @@ namespace LTB {
         inline Camera2DComponent(const Camera2DComponent&) = default;
         inline Camera2DComponent() = default;
 	    Camera2D Camera;
+        bool Primary = true;
     };
 
     // model component
@@ -103,6 +111,7 @@ namespace LTB {
     // base entity
     struct Entity 
     {
+        inline Entity() = default;		
         inline Entity(EntityRegistry* registry, EntityID entity): 
             m_Registry(registry), m_EnttID(entity) 
         {}
@@ -113,8 +122,8 @@ namespace LTB {
             m_EnttID = m_Registry->create();		 			
         }
 
+        Entity(const Entity& other) = default;
         inline virtual ~Entity() = default;
-        inline Entity() = default;		
 
         inline operator EntityID () 
         { 
@@ -167,6 +176,9 @@ namespace LTB {
         { 
             return m_Registry->get<T>(m_EnttID); 
         }
+
+        UUID GetUUID() { return Get<IDComponent>().ID; }
+		const std::string& GetName() { return Get<InfoComponent>().Name; }
 
     protected:
         EntityRegistry* m_Registry = nullptr;

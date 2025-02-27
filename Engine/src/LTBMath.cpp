@@ -78,4 +78,34 @@ namespace LTB::Math {
 		return true;
 	}
 
+	Matrix GetTransformMatrix(Vector3 position, Quaternion rotation, Vector3 scale) {
+		Matrix translation = MatrixTranslate(position.x, position.y, position.z);
+		Matrix rotationMat = QuaternionToMatrix(rotation);
+		Matrix scaleMat = MatrixScale(scale.x, scale.y, scale.z);
+		return MatrixMultiply(MatrixMultiply(translation, rotationMat), scaleMat);
+	}
+
+	void MatrixDecompose(Matrix mat, Vector3 *outTranslation, Quaternion *outRotation, Vector3 *outScale) {
+		outTranslation->x = mat.m12;
+		outTranslation->y = mat.m13;
+		outTranslation->z = mat.m14;
+
+		outScale->x = Vector3Length(Vector3{ mat.m0, mat.m1, mat.m2 });
+		outScale->y = Vector3Length(Vector3{ mat.m4, mat.m5, mat.m6 });
+		outScale->z = Vector3Length(Vector3{ mat.m8, mat.m9, mat.m10 });
+
+		Matrix rotationMatrix = mat;
+		rotationMatrix.m0 /= outScale->x;
+		rotationMatrix.m1 /= outScale->x;
+		rotationMatrix.m2 /= outScale->x;
+		rotationMatrix.m4 /= outScale->y;
+		rotationMatrix.m5 /= outScale->y;
+		rotationMatrix.m6 /= outScale->y;
+		rotationMatrix.m8 /= outScale->z;
+		rotationMatrix.m9 /= outScale->z;
+		rotationMatrix.m10 /= outScale->z;
+
+		*outRotation = QuaternionFromMatrix(rotationMatrix);
+	}
+
 }

@@ -1,7 +1,6 @@
 #pragma once
 #include "Config.h"
 #include "Window.h"
-#include "Renderer.h"
 #include "Assets.h"
 #include "ImGui/ImGuiLayer.h"
 #include "LayerStack.h"
@@ -14,51 +13,20 @@ namespace LTB{
         Application();
         virtual ~Application();
 
-        void Run();
-        void Update();
-        void Render();
+        void Run();        
 
         void PushLayer(Layer* layer);
         void PushOverlay(Layer* layer);
 
         inline ImGuiLayer& GetImGuiLayer() { return *mImGuiLayer;}
-        inline static Application& Get() { return *sInstance;}
-        inline Renderer& GetRenderer() { return *mRenderer;}
+        inline static Application& Get() { return *sInstance;}        
         inline AssetRegistry& GetAssets() { return *mAssets;}
 
         inline void Close(){
             mWindow->Close();
         }
 
-    public:
-         // create entity
-        template <typename Entt, typename... Args>
-        inline Entt CreateEntt(Args&&... args)
-        {
-            // GEN_STATIC_ASSERT(std::is_base_of<Entity, Entt>::value);
-            return std::move(Entt(&mScene, std::forward<Args>(args)...));
-        }
-
-        // convert id to entity
-        template<typename Entt>
-        inline Entt ToEntt(EntityID entity)
-        {
-            // GEN_STATIC_ASSERT(std::is_base_of<Entity, Entt>::value);
-            return std::move(Entt(&mScene, entity));
-        }
-
-        // loop through entities
-        template<typename Entt, typename Comp, typename Task>
-        inline void EnttView(Task&& task)
-        {
-            // GEN_STATIC_ASSERT(std::is_base_of<Entity, Entt>::value);
-            mScene.view<Comp>().each([this, &task]
-            (auto entity, auto& comp)
-            {
-                task(std::move(Entt(&mScene, entity)), comp);
-            });
-        }
-
+    public:        
         // loop through assets
         template<typename Task>
         inline void AssetView(Task&& task)
@@ -94,8 +62,7 @@ namespace LTB{
             mDispatcher.DetachCallback<Event>(mLayerID);
         }
     private:
-        Scope<Window> mWindow;
-        Scope<Renderer> mRenderer;
+        Scope<Window> mWindow;        
         Scope<AssetRegistry> mAssets;
         ImGuiLayer* mImGuiLayer;
         LayerStack mLayerStack;
