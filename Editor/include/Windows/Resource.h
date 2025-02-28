@@ -2,12 +2,19 @@
 #include "EditorLayer.h"
 
 namespace LTB {
+
+    // Once we have projects, change this
+	extern const std::filesystem::path g_AssetPath = "Resources";
+
     class ResourceWindow : public IWidget{
     public:	
         inline ResourceWindow(EditorLayer* context): IWidget(context)
         {
             m_IconImage = LoadTexture("Resources/Icons/asset.png");
-            m_Icon = (ImTextureID)&m_IconImage;            
+            mDirImage = LoadTexture("Resources/Icons/ContentBrowser/DirectoryIcon.png");
+            m_Icon = (ImTextureID)&m_IconImage;
+            mDirIcon = (ImTextureID)&mDirImage;     
+            mCurrentDirectory = g_AssetPath;       
         }
 
         inline void OnShow(EditorLayer* context) override
@@ -15,30 +22,91 @@ namespace LTB {
             if(ImGui::Begin(ICON_FA_FOLDER_OPEN "\tResources")) 
             {
                               
-                int nbrColumn = (ImGui::GetContentRegionAvail().x/ASSET_SIZE) + 1;			
-                int columnCounter = 1;
-                int rowCounter = 1;
-                if(ImGui::BeginTable("", nbrColumn))
-                {
+                // int nbrColumn = (ImGui::GetContentRegionAvail().x/ASSET_SIZE) + 1;			
+                // int columnCounter = 1;
+                // int rowCounter = 1;
+                // if(ImGui::BeginTable("", nbrColumn))
+                // {
 
-                Application::Get().AssetView([&] (auto* asset) 
-                {	
+                // Application::Get().AssetView([&] (auto* asset) 
+                // {	
                                                     
-                    // show asset icon
-                    iSClicked = ImGui::ImageButtonEx(asset->UID, 
-                    m_Icon, ImVec2(ASSET_SIZE, ASSET_SIZE), ImVec2(0, 1), 
-                    ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1));
-                    ImGui::Text(asset->Name.c_str());
-                    ImGui::TableNextColumn();                    
+                //     // show asset icon
+                //     if(asset->Type == AssetType::TEXTURE){
+                //         // m_Icon = std::static_pointer_cast<TextureAsset>(asset)->Data;
+                //         m_Icon = (ImTextureID)&static_cast<TextureAsset*>(asset)->Data;
+                //     }
+                //     else{
+                //         m_Icon = (ImTextureID)&m_IconImage;
+                //     }
+                //     iSClicked = ImGui::ImageButtonEx(asset->UID, 
+                //     m_Icon, ImVec2(ASSET_SIZE, ASSET_SIZE), ImVec2(0, 1), 
+                //     ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1));
+                //     ImGui::Text(asset->Name.c_str());
+                //     ImGui::TableNextColumn();                    
 
-                    if(iSClicked){
-                        // m_Selected = asset->UID;                        
-                    }
+                //     if(iSClicked){
+                //         // m_Selected = asset->UID;                        
+                //     }
                         
-                });
+                // });
 
-                ImGui::EndTable();
+                // ImGui::EndTable();
+                // }
+
+                if(mCurrentDirectory != std::filesystem::path(g_AssetPath)){
+                    if(ImGui::Button("<-")){
+                        mCurrentDirectory = mCurrentDirectory.parent_path();
+                    }
                 }
+
+                static float padding = 16.0f;
+                static float thumbnailSize = 128.0f;
+                float cellSize = thumbnailSize + padding;
+
+                float panelWidth = ImGui::GetContentRegionAvail().x;
+                int columnCount = (int)(panelWidth / cellSize);
+                if (columnCount < 1)
+                    columnCount = 1;
+
+                ImGui::Columns(columnCount, 0, false);
+
+                for (auto& directoryEntry : std::filesystem::directory_iterator(mCurrentDirectory))
+                {
+                    const auto& path = directoryEntry.path();
+                    auto relativePath = std::filesystem::relative(path, g_AssetPath);
+                    std::string filenameString = relativePath.filename().string();
+                    
+                    ImGui::PushID(filenameString.c_str());
+                    ImTextureID icon = directoryEntry.is_directory() ? mDirIcon : m_Icon;
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+                    ImGui::ImageButton(filenameString.c_str(),icon, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+
+                    if (ImGui::BeginDragDropSource())
+                    {
+                        const wchar_t* itemPath = relativePath.c_str();
+                        ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+                        ImGui::EndDragDropSource();
+                    }
+
+                    ImGui::PopStyleColor();
+                    if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                    {
+                        if (directoryEntry.is_directory())
+                            mCurrentDirectory /= path.filename();
+
+                    }
+                    ImGui::TextWrapped(filenameString.c_str());
+
+                    ImGui::NextColumn();
+
+                    ImGui::PopID();
+                }
+
+                ImGui::Columns(1);
+
+                ImGui::SliderFloat("Thumbnail Size", &thumbnailSize, 16, 512);
+                ImGui::SliderFloat("Padding", &padding, 0, 32);
 
             }
             ImGui::End();
@@ -57,9 +125,13 @@ namespace LTB {
     private:
         // Entity m_Selected;
         Texture2D m_IconImage;
+        Texture2D mDirImage;
         ImTextureID m_Icon;
+        ImTextureID mDirIcon;
         bool isSelected;
         bool iSClicked;
+        std::filesystem::path mCurrentDirectory;
+
         // AssetID m_Selected;
     };
 }

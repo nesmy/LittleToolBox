@@ -1,6 +1,9 @@
 #pragma once
 #include "EnttInfo.h"
 #include "Transform.h"
+#include "Camera.h"
+#include "Camera2D.h"
+#include "Sprite.h"
 
 namespace LTB {
 
@@ -8,6 +11,9 @@ namespace LTB {
         inline InspectorWindow(EditorLayer* context): IWidget(context){
             mWidgets.push_back(context->CreateWidget<InfoControl>());
             mWidgets.push_back(context->CreateWidget<TransformControl>());
+            mWidgets.push_back(context->CreateWidget<CameraControl>());
+            mWidgets.push_back(context->CreateWidget<Camera2DControl>());
+            mWidgets.push_back(context->CreateWidget<SpriteControl>());
         }
 
         inline void OnShow(EditorLayer* context) override{

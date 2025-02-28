@@ -140,7 +140,7 @@ namespace LTB {
                                 // transform.translation = newTranslation;
                                 // transform.rotation = newRotation;
                                 // transform.scale = newScale;
-                                LTB_INFO("{}", name);
+                                // LTB_INFO("{}", name);
                             }
                         });
                     }
@@ -173,12 +173,12 @@ namespace LTB {
                                                     ImGuizmo::WORLD, matrix                                               
                                                     );
 
-                                LTB_INFO("{}", name);
+                                // LTB_INFO("{}", name);
                             }
 
                             if(CheckCollisionPointRec({ImGui::GetMousePos().x, ImGui::GetMousePos().y}, comp.mSprite.Box)){
                                 // entityID = entity;
-                                LTB_INFO("RECT2");
+                                // LTB_INFO("RECT2");
                             }
                         });
                     }

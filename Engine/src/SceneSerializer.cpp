@@ -335,6 +335,8 @@ namespace LTB {
 
             out << YAML::Key << "Color" << YAML::Value << color;
 
+            out << YAML::EndMap; // sprite
+
             out << YAML::EndMap; // SpriteComponent
         }
 
@@ -345,8 +347,8 @@ namespace LTB {
     void SceneSerializer::Serialize(const std::string& filepath){
         YAML::Emitter out;
         out << YAML::BeginMap;
-        out << YAML::Key << "Scene" << YAML::Value << "Untitled";
-        out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
+		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
+		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
         mScene->AllEntt<Entity>([this, &out] (auto entityID) {
             Entity entity = Entity(&mScene->mRegistry, entityID);
             if(!entity)
@@ -355,7 +357,7 @@ namespace LTB {
         });
 
         out << YAML::EndSeq;
-        out << YAML::EndMap;
+		out << YAML::EndMap;
 
 		std::ofstream fout(filepath);
 		fout << out.c_str();

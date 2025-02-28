@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "Framebuffer.h"
 
+
 namespace LTB {
 
     class EditorLayer : public Layer {
@@ -19,7 +20,12 @@ namespace LTB {
 
         virtual void OnGuiStart();
         virtual void OnGuiFrame();
-
+    private:
+        void NewScene();
+        void OpenScene();
+        void OpenScene(const std::filesystem::path& path);
+        void SaveScene();
+        void SaveSceneAs();
         void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
 
     public:
@@ -56,6 +62,7 @@ namespace LTB {
 			Edit = 0, Play = 1
 		};
 		SceneState mSceneState = SceneState::Edit;
-        Scope<Framebuffer> mBuffer;
+        Scope<Framebuffer> mBuffer;        
+        friend class MenuBarWindow;
     };
 }

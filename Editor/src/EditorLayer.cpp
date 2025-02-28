@@ -8,6 +8,7 @@
 #include "SceneSerializer.h"
 #include <ImGuizmo.h>
 
+
 namespace LTB {
 
     EditorLayer::EditorLayer()
@@ -17,7 +18,7 @@ namespace LTB {
         Application::Get().AttachCallback<SelectEvent>([this] (auto e){
             for(auto& window : mWindows)
                 window->OnSelect(mActiveScene->ToEntt<Entity>(e.EnttID));
-        });
+        });        
 
         mActiveScene = CreateRef<Scene>();
         mBuffer = CreateScope<Framebuffer>(GetScreenWidth(), GetScreenHeight());
@@ -25,20 +26,20 @@ namespace LTB {
         OnGuiStart();
 
         auto asset = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
-        auto asset1 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
-        auto asset2 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
-        auto asset3 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/1_club.png");
+        auto asset1 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/2_club.png");
+        auto asset2 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/3_club.png");
+        auto asset3 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/4_club.png");
         auto model1 = Application::Get().GetAssets().AddModel(RandomU64(), "Resources/Models/sphere.obj");
 
         SceneSerializer serializer(mActiveScene);
-        serializer.Deserialize("Resources/Saves/test.data");
+        // serializer.Deserialize("Resources/Saves/test.data");
 
         // auto cam = Application::Get().CreateEntt<Entity>();
         // cam.Attach<InfoComponent>().Name = "Cam";
         // cam.Attach<CameraComponent>();
         // auto& camTs = cam.Attach<TransformComponent>().Transforms;
         // camTs.translation = Vector3{0.0f};
-#if 0
+#if 1
         auto test = mActiveScene->CreateEntity("Test");
         auto& mod = test.Attach<ModelComponent>();
         mod.mModel = model1->Data;
@@ -65,6 +66,7 @@ namespace LTB {
     }
 
     void EditorLayer::OnUpdate(float deltaTime){
+        
         mBuffer->Resize();
         mBuffer->Bind();
         ClearBackground(GREEN);
@@ -129,7 +131,8 @@ namespace LTB {
                 OnGuiFrame();
             }
             ImGui::End();
-            }
+        }
+                    
     }
 
     void EditorLayer::OnGuiStart(){
@@ -148,5 +151,61 @@ namespace LTB {
 	{
 		SceneSerializer serializer(scene);
 		serializer.Serialize(path.string());
+	}
+
+    void EditorLayer::NewScene(){
+        mActiveScene = CreateRef<Scene>();
+        mEditorScenePath = std::filesystem::path();
+    }
+
+    void EditorLayer::OpenScene(){
+        
+        mActiveScene->fileDialogState.windowActive = true;
+        //  if (mActiveScene->fileDialogState.windowActive) GuiLock();
+        std::string filepath(mActiveScene->fileNameToLoad);
+        if(!filepath.empty())
+            OpenScene(filepath);
+
+        // GuiUnlock();
+    }
+
+    void EditorLayer::OpenScene(const std::filesystem::path& path){
+        if (mSceneState != SceneState::Edit)
+        {
+            // OnSceneStop();
+        }
+
+		if (path.extension().string() != ".data")
+		{
+			LTB_WARN("Could not load {0} - not a scene file", path.filename().string());
+			return;
+		}
+		
+		Ref<Scene> newScene = CreateRef<Scene>();
+		SceneSerializer serializer(newScene);
+		if (serializer.Deserialize(path.string()))
+		{					
+			mActiveScene = newScene;
+			mEditorScenePath = path;
+		}
+    }
+
+    void EditorLayer::SaveScene(){
+        // if (!mEditorScenePath.empty())
+			// SerializeScene(mActiveScene, mEditorScenePath);
+			SerializeScene(mActiveScene, "Resources/Saves/test.data");
+		// else
+			// SaveSceneAs();
+    }
+
+    void EditorLayer::SaveSceneAs()
+	{
+		// std::string filepath = FileDialogs::SaveFile("FunShot Scene (*.FunShot)\0*.FunShot\0");
+		// if (!filepath.empty())
+		// {
+		// 	SerializeScene(m_ActiveScene, filepath);
+		// 	m_EditorScenePath = filepath;
+		// }
+        LTB_INFO("TODO");
 	}
 }

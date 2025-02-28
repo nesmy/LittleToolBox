@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "UUID.h"
+#include "gui_window_file_dialog.h"
 
 namespace LTB {
 
@@ -30,6 +31,7 @@ namespace LTB {
         void EndCam();
 
         void SwitchCam();
+        void UpdateCamera2D(Camera2D& camera);
 
     public:
          // create entity
@@ -73,7 +75,11 @@ namespace LTB {
         Camera3D &GetCam() { return mGlobalCam;}
         Camera2D &GetCam2D() { return mGlobalCam2D;}
         bool &Is2D() { return Switch2d;}  
-        void BlockUpdate(bool update);      
+        void BlockUpdate(bool update);   
+
+        //tmp
+        GuiWindowFileDialogState fileDialogState;
+        char fileNameToLoad[512] = { 0 };   
     private:
         EntityRegistry mRegistry;        
         Camera3D mGlobalCam = {0};

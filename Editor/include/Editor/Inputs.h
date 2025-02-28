@@ -59,6 +59,41 @@ namespace LTB {
         return hasChanged;
     }
 
+    //todo
+    // shows color inpute field
+    inline bool InputColor(const char* label, Color* color){
+        BeginInput(label);
+        float r = (float)color->r;
+        bool hasChanged = ImGui::ColorEdit4("##", {&r});
+        EndInput();
+
+        return hasChanged;
+    }
+    
+
+    inline bool InputTexture(const char* label, Texture2D& texture){
+        BeginInput(label);
+
+        ImGui::Image((ImTextureID)&texture, ImVec2(50, 50));
+        EndInput();
+
+        return true;
+    }
+
+    // show rectangle inpute field
+    inline bool InputRectangle(const char* label, Rectangle* rect){
+        BeginInput(label);
+        bool hasChange = false;
+        bool x = ImGui::InputFloat("##", &rect->x);
+        bool y = ImGui::InputFloat("##1", &rect->y);
+        bool width = ImGui::InputFloat("##2", &rect->width);
+        bool height = ImGui::InputFloat("##3", &rect->height);
+        EndInput();
+
+        hasChange = x && y && width && height;
+        return hasChange;
+    }
+
     // shows button
     inline bool InputButton(const char* label,const ImVec2& size = ImVec2(0,0)) 
     {

@@ -81,9 +81,9 @@ namespace LTB {
 							{
 								// entity.template Attach<SpotLightComponent>();
 							}
-							if(ImGui::MenuItem(ICON_FA_FORWARD " Add Transform"))
+							if(ImGui::MenuItem(ICON_FA_FORWARD " Add Sprite"))
 							{
-								// entity.template Attach<TransformComponent>();
+								entity.template Attach<SpriteComponent>();
 							}
 							if(ImGui::MenuItem(ICON_FA_FORWARD " Add RigidBody"))
 							{

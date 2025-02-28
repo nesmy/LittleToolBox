@@ -28,6 +28,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/ImGui
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Auxiliaries
     ${CMAKE_SOURCE_DIR}/Vendor/raylib/src    
+    ${CMAKE_SOURCE_DIR}/Vendor/raygui/src    
     ${CMAKE_SOURCE_DIR}/Vendor/entt/src
     ${CMAKE_SOURCE_DIR}/Vendor/glm
     ${CMAKE_SOURCE_DIR}/Vendor/imgui

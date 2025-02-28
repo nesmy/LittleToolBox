@@ -20,28 +20,17 @@ namespace LTB {
             {
                 if (ImGui::BeginMenu("File")) 
                 {
-                    if (ImGui::MenuItem(ICON_FA_FILE " New Project", "Ctrl+N")) {}
-                    if (ImGui::MenuItem(ICON_FA_FILE " Open Project", "Ctrl+O")) {
-                        // context->Deserialize(*context->GetContext()->Assets, "Resources/Projects/savedassets.yaml");
-                        // context->Deserialize(context->GetContext()->Scene, "Resources/Projects/savedscene.yaml");
-                        Ref<Scene> newScene = CreateRef<Scene>();
-                        SceneSerializer serializer(newScene);
-                        if (serializer.Deserialize("Resources/Saves/test.data"))
-                        {                                                        
-                            context->mEditorScenePath = "Resources/Saves/test.data";
-
-                            context->GetActiveSceneRef() = newScene;
-                        }
+                    if (ImGui::MenuItem(ICON_FA_FILE " New Scene", "Ctrl+N")) {
+                        context->NewScene();
+                    }
+                    if (ImGui::MenuItem(ICON_FA_FILE " Open Scene", "Ctrl+O")) {                        
+                        context->OpenScene();
                     }
                     if (ImGui::MenuItem(ICON_FA_STORE " Save Scene", "Ctrl+S")) {
-                        // context->Serialize(*context->GetContext()->Assets, "Resources/Projects/savedassets.yaml");
-                        // context->Serialize(context->GetContext()->Scene, "Resources/Projects/savedscene.yaml"); 
-                        std::string filepath = "Resources/Saves/test.data";
-                        if (!filepath.empty())
-                        {
-                            context->SerializeScene(context->GetActiveSceneRef(), filepath);
-                            context->mEditorScenePath = filepath;
-                        }
+                        context->SaveScene();
+                    }
+                    if (ImGui::MenuItem(ICON_FA_STORE " Save Scene As", "Ctrl+S")) {
+                        context->SaveSceneAs();
                     }
                     if (ImGui::MenuItem(ICON_FA_DOOR_CLOSED " Exit", "Alt+F4")) {
                         Application::Get().Close();    
