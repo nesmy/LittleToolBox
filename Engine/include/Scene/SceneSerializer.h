@@ -2,6 +2,10 @@
 
 #include "Scene.h"
 
+namespace YAML{
+    class Node;
+}
+
 namespace LTB {
 
     class SceneSerializer{
@@ -13,6 +17,8 @@ namespace LTB {
 		bool Deserialize(const std::string& filepath);
 		bool DeserializeRuntime(const std::string& filepath);
     private:
+        void DeserializeEntities(YAML::Node& data);
+        void DeserializeAssets(YAML::Node& data);
         Ref<Scene> mScene;
     };
 }

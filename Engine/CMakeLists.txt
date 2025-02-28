@@ -8,7 +8,13 @@ file(GLOB_RECURSE headers ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 file(GLOB ImGuizmo ${CMAKE_SOURCE_DIR}/Vendor/ImGuizmo/ImGuizmo.cpp)
 file(GLOB ImGuizmoH ${CMAKE_SOURCE_DIR}/Vendor/ImGuizmo/ImGuizmo.h)
 
-add_library(${PROJECT_NAME} ${sources} ${headers} ${ImGuizmoH} ${ImGuizmo} )
+file(GLOB ImGuiFileDialog ${CMAKE_SOURCE_DIR}/Vendor/ImGuiFileDialog/ImGuiFileDialog.cpp)
+file(GLOB ImGuiFileDialogH ${CMAKE_SOURCE_DIR}/Vendor/ImGuiFileDialog/ImGuiFileDialog.h)
+file(GLOB ImGuiFileDialogConfig ${CMAKE_SOURCE_DIR}/Vendor/ImGuiFileDialog/ImGuiFileDialogConfig.h)
+
+add_library(${PROJECT_NAME} ${sources} ${headers} 
+                            ${ImGuizmoH} ${ImGuizmo} )
+                            # ${ImGuiFileDialogH} ${ImGuiFileDialogH} ${ImGuiFileDialogConfig})
 
 target_precompile_headers(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ltbpch.h)
 set_source_files_properties(${ImGuizmo}
@@ -39,6 +45,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_SOURCE_DIR}/Vendor/yaml-cpp/include
     # ${CMAKE_SOURCE_DIR}/Vendor/raygizmo/include
     ${CMAKE_SOURCE_DIR}/Vendor/raylib/src
+    ${CMAKE_SOURCE_DIR}/Vendor/ImGuiFileDialog
 )
 
 # link libraries
@@ -48,6 +55,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     spdlog   
     EnTT
     imgui
+    ImGuiFileDialog
     rImGui    
     yaml-cpp
 )

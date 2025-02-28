@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace LTB {
+    extern const std::filesystem::path g_AssetPath = "Resources";
     class ViewportWindow : public IWidget {
     public:
         inline ViewportWindow(EditorLayer* context): IWidget(context)
@@ -78,6 +79,16 @@ namespace LTB {
                 if(ImGui::IsWindowHovered())
                 {                        
                     
+                }
+
+                if (ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+                    {
+                        const wchar_t* path = (const wchar_t*)payload->Data;
+                        context->OpenScene(std::filesystem::path(g_AssetPath) / path);
+                    }
+                    ImGui::EndDragDropTarget();
                 }
 
                 //gizmo3D

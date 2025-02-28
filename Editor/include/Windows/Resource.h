@@ -4,7 +4,7 @@
 namespace LTB {
 
     // Once we have projects, change this
-	extern const std::filesystem::path g_AssetPath = "Resources";
+	extern const std::filesystem::path g_AssetPath;
 
     class ResourceWindow : public IWidget{
     public:	
@@ -20,39 +20,7 @@ namespace LTB {
         inline void OnShow(EditorLayer* context) override
         {
             if(ImGui::Begin(ICON_FA_FOLDER_OPEN "\tResources")) 
-            {
-                              
-                // int nbrColumn = (ImGui::GetContentRegionAvail().x/ASSET_SIZE) + 1;			
-                // int columnCounter = 1;
-                // int rowCounter = 1;
-                // if(ImGui::BeginTable("", nbrColumn))
-                // {
-
-                // Application::Get().AssetView([&] (auto* asset) 
-                // {	
-                                                    
-                //     // show asset icon
-                //     if(asset->Type == AssetType::TEXTURE){
-                //         // m_Icon = std::static_pointer_cast<TextureAsset>(asset)->Data;
-                //         m_Icon = (ImTextureID)&static_cast<TextureAsset*>(asset)->Data;
-                //     }
-                //     else{
-                //         m_Icon = (ImTextureID)&m_IconImage;
-                //     }
-                //     iSClicked = ImGui::ImageButtonEx(asset->UID, 
-                //     m_Icon, ImVec2(ASSET_SIZE, ASSET_SIZE), ImVec2(0, 1), 
-                //     ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1));
-                //     ImGui::Text(asset->Name.c_str());
-                //     ImGui::TableNextColumn();                    
-
-                //     if(iSClicked){
-                //         // m_Selected = asset->UID;                        
-                //     }
-                        
-                // });
-
-                // ImGui::EndTable();
-                // }
+            {                                              
 
                 if(mCurrentDirectory != std::filesystem::path(g_AssetPath)){
                     if(ImGui::Button("<-")){
@@ -105,8 +73,8 @@ namespace LTB {
 
                 ImGui::Columns(1);
 
-                ImGui::SliderFloat("Thumbnail Size", &thumbnailSize, 16, 512);
-                ImGui::SliderFloat("Padding", &padding, 0, 32);
+                // ImGui::SliderFloat("Thumbnail Size", &thumbnailSize, 16, 512);
+                // ImGui::SliderFloat("Padding", &padding, 0, 32);
 
             }
             ImGui::End();

@@ -1,0 +1,23 @@
+Scene: Untitled
+Entities:
+  - Entity: 8601786094038631770
+    InfoComponent:
+      Name: Test2
+    TransformComponent:
+      Translation: [10, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0, 0, 0]
+    SpriteComponent:
+      Sprite:
+        Texture:
+          ID: 9
+          Height: 144
+          Width: 100
+          Format: 7
+          MipMaps: 1
+        Box:
+          X: 10
+          Y: 0
+          Width: 105
+          Height: 149
+        Color: ["\xff", "\xff", "\xff", "\xff"]

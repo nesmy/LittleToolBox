@@ -6,6 +6,8 @@
 
 namespace LTB {
 
+    extern const std::filesystem::path g_AssetPath;
+
     class SpriteControl : public IControl<SpriteComponent>{
     public:
         inline SpriteControl(EditorLayer* context) : IControl(context){
@@ -40,6 +42,31 @@ namespace LTB {
                 });
                 ImGui::EndPopup();
             }
+            
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+                {
+                    const wchar_t* path = (const wchar_t*)payload->Data;
+                    // context->OpenScene(std::filesystem::path(g_AssetPath) / path);
+                    std::filesystem::path newPath = std::filesystem::path(g_AssetPath) / path;
+                    std::string filepath = newPath.generic_string();
+                    Application::Get().AssetView([&] (auto* asset)
+                    {
+                        if(asset->Source == filepath){
+                            data.Texture = static_cast<TextureAsset*>(asset)->Data;   
+                            count++;                         
+                        }
+                        else if(count == 0){
+                            auto newAsset = Application::Get().GetAssets().AddTexture(RandomU64(), 
+                                                                                    filepath);
+                            data.Texture = newAsset->Data;
+                            count++;
+                        }
+                    });
+                }
+                ImGui::EndDragDropTarget();
+            }
 
 
             EndInput();
@@ -59,5 +86,6 @@ namespace LTB {
         }
     private:
         ImTextureID mIcon;
+        int count = 0;
     };
 }

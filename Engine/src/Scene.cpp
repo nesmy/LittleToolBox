@@ -2,18 +2,10 @@
 #include "Scene.h"
 #include "ECS.h"
 #include "Application.h"
-#define RAYGUI_IMPLEMENTATION
-#include <raygui.h>
-
-#undef RAYGUI_IMPLEMENTATION            // Avoid including raygui implementation again
-
-#define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
-#include "gui_window_file_dialog.h"
 
 namespace LTB {
 
-    Scene::Scene(){        
-        fileDialogState = InitGuiWindowFileDialog(GetWorkingDirectory());
+    Scene::Scene(){                
         mGlobalCam.position = Vector3{1.0f, 1.0f, 1.0f};
         mGlobalCam.target = Vector3{4.0f, 1.0f, 4.0f};
         mGlobalCam.up = Vector3{0.0f, 1.0f, 0.0f};
@@ -56,16 +48,7 @@ namespace LTB {
     void Scene::OnRuntimeStop() {}
 
     void Scene::OnUpdateRuntime(float deltaTime) {}
-    void Scene::OnUpdateEditor(float deltaTime) {  
-
-        if(fileDialogState.SelectFilePressed){
-            //Load file
-            if(IsFileExtension(fileDialogState.fileNameText, ".data")){
-                 strcpy(fileNameToLoad, TextFormat("%s" PATH_SEPERATOR "%s", fileDialogState.dirPathText, fileDialogState.fileNameText));
-            }
-
-            fileDialogState.SelectFilePressed = false;
-        } 
+    void Scene::OnUpdateEditor(float deltaTime) {          
         if(StopUpdate == false && Switch2d == false)
             UpdateCamera(&mGlobalCam, CAMERA_FREE);   
 
@@ -88,11 +71,6 @@ namespace LTB {
             DrawTextureV(comp.mSprite.Texture, {transform.translation.x, transform.translation.y}, WHITE);
             // LTB_CORE_INFO("x: {}, y: {}",transform.translation.x, transform.translation.y);
         });
-
-        if (fileDialogState.windowActive) GuiLock();
-        if (GuiButton(Rectangle{ 20, 20, 140, 30 }, GuiIconText(ICON_FILE_OPEN, "Open Image"))) fileDialogState.windowActive = true;
-         GuiUnlock();
-        GuiWindowFileDialog(&fileDialogState);
         DrawGrid(10, 1.0);
         EndCam();
     }

@@ -7,6 +7,7 @@
 #include "Resource.h"
 #include "SceneSerializer.h"
 #include <ImGuizmo.h>
+#include <ImGuiFileDialog.h>
 
 
 namespace LTB {
@@ -39,7 +40,7 @@ namespace LTB {
         // cam.Attach<CameraComponent>();
         // auto& camTs = cam.Attach<TransformComponent>().Transforms;
         // camTs.translation = Vector3{0.0f};
-#if 1
+#if 0
         auto test = mActiveScene->CreateEntity("Test");
         auto& mod = test.Attach<ModelComponent>();
         mod.mModel = model1->Data;
@@ -126,6 +127,34 @@ namespace LTB {
                 }
 
                 // m_ViewportFocused = ImGui::IsWindowFocused();
+                if (ImGuiFileDialog::Instance()->Display("OpenScene")) {
+                    if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK
+                        filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+                        filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+                        // action
+                        if(!filePathName.empty())
+                            OpenScene(filePathName);
+                    }
+
+                    // close
+                    ImGuiFileDialog::Instance()->Close();
+                }
+
+                if (ImGuiFileDialog::Instance()->Display("SaveSceneAs")) {
+                    if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK
+                        std::string SavefilePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+                        std::string SavefilePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+                        // action
+                        if (!SavefilePathName.empty())
+                        {
+                        	SerializeScene(mActiveScene, SavefilePathName);
+                        	mEditorScenePath = SavefilePathName;
+                        }
+                    }
+
+                    // close
+                    ImGuiFileDialog::Instance()->Close();
+                }
 
                 // Interface update
                 OnGuiFrame();
@@ -153,6 +182,38 @@ namespace LTB {
 		serializer.Serialize(path.string());
 	}
 
+    void EditorLayer::Controls()
+    {
+        bool control = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
+        bool shift = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
+        bool alt = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
+        if(IsKeyPressed(KEY_N)){
+            if(control)
+                NewScene();
+        }
+
+        if(IsKeyPressed(KEY_O)){
+            if(control)
+                OpenScene();
+        }
+
+        if(IsKeyPressed(KEY_S)){
+            if(control){
+                if(shift)
+                    SaveSceneAs();
+                else
+                    SaveScene();
+            }
+                
+        }
+        if(IsKeyPressed(KEY_F4)){
+            if(alt)
+                Application::Get().Close();
+        }
+
+
+    }
+
     void EditorLayer::NewScene(){
         mActiveScene = CreateRef<Scene>();
         mEditorScenePath = std::filesystem::path();
@@ -160,13 +221,9 @@ namespace LTB {
 
     void EditorLayer::OpenScene(){
         
-        mActiveScene->fileDialogState.windowActive = true;
-        //  if (mActiveScene->fileDialogState.windowActive) GuiLock();
-        std::string filepath(mActiveScene->fileNameToLoad);
-        if(!filepath.empty())
-            OpenScene(filepath);
-
-        // GuiUnlock();
+        IGFD::FileDialogConfig config;
+        config.path = ".";
+        ImGuiFileDialog::Instance()->OpenDialog("OpenScene", "Choose File", ".data", config);        
     }
 
     void EditorLayer::OpenScene(const std::filesystem::path& path){
@@ -191,21 +248,17 @@ namespace LTB {
     }
 
     void EditorLayer::SaveScene(){
-        // if (!mEditorScenePath.empty())
-			// SerializeScene(mActiveScene, mEditorScenePath);
-			SerializeScene(mActiveScene, "Resources/Saves/test.data");
-		// else
-			// SaveSceneAs();
+        if (!mEditorScenePath.empty())
+			SerializeScene(mActiveScene, mEditorScenePath);			
+		else
+			SaveSceneAs();
     }
 
     void EditorLayer::SaveSceneAs()
 	{
-		// std::string filepath = FileDialogs::SaveFile("FunShot Scene (*.FunShot)\0*.FunShot\0");
-		// if (!filepath.empty())
-		// {
-		// 	SerializeScene(m_ActiveScene, filepath);
-		// 	m_EditorScenePath = filepath;
-		// }
-        LTB_INFO("TODO");
+
+        IGFD::FileDialogConfig config;
+        config.path = ".";
+        ImGuiFileDialog::Instance()->OpenDialog("SaveSceneAs", "Choose File", ".data", config); 
 	}
 }

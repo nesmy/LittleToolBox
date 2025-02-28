@@ -2,7 +2,9 @@
 #include "SceneSerializer.h"
 #include <yaml-cpp/yaml.h>
 #include "ECS.h"
+#include "Assets.h"
 #include <fstream>
+#include "Application.h"
 
 namespace YAML {
     template<>
@@ -149,10 +151,40 @@ namespace YAML {
 			if (!node.IsSequence() || node.size() != 4)
 				return false;
 
-			rhs.r = node[0].as<unsigned char>();
-			rhs.g = node[1].as<unsigned char>();
-			rhs.b = node[2].as<unsigned char>();
-			rhs.a = node[3].as<unsigned char>();
+			// rhs.r = node[0].as<int>();
+			// rhs.g = node[1].as<int>();
+			// rhs.b = node[2].as<int>();
+			// rhs.a = node[3].as<int>();
+            rhs = WHITE;
+			return true;
+		}
+	};
+
+    template<>
+	struct convert<Texture>
+	{
+		static Node encode(const Texture& rhs)
+		{
+			Node node;
+			node.push_back(rhs.id);			
+			node.push_back(rhs.format);			
+			node.push_back(rhs.mipmaps);			
+			node.push_back(rhs.width);			
+			node.push_back(rhs.height);			
+			node.SetStyle(EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, Texture& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 4)
+				return false;
+
+			rhs.id = node[0].as<unsigned int>();
+			rhs.format = node[1].as<int>();
+			rhs.mipmaps = node[2].as<int>();
+			rhs.width = node[3].as<int>();
+			rhs.height = node[4].as<int>();
 			return true;
 		}
 	};
@@ -344,20 +376,51 @@ namespace LTB {
 
     }
 
+    static void SerializeAssets(YAML::Emitter& out, Asset* asset){
+        out << YAML::BeginMap; // Assets
+        out << YAML::Key << "UUID" << YAML::Value << asset->UID;
+        out << YAML::Key << "Type" << YAML::Value << (int)asset->Type;
+        out << YAML::Key << "Name" << YAML::Value << asset->Name;
+        out << YAML::Key << "Source" << YAML::Value << asset->Source;
+        if(asset->Type == AssetType::TEXTURE){
+            auto textAss = static_cast<TextureAsset*>(asset);
+            out << YAML::Key << "Texture";
+            out << YAML::BeginMap; // Texture
+            // auto textAss = (TextureAsset*)asset;
+            out << YAML::Key << "ID" << YAML::Value << textAss->Data.id;
+            out << YAML::Key << "Height" << YAML::Value << textAss->Data.height;
+            out << YAML::Key << "Width" << YAML::Value << textAss->Data.width;
+            out << YAML::Key << "Format" << YAML::Value << textAss->Data.format;
+            out << YAML::Key << "MipMaps" << YAML::Value << textAss->Data.mipmaps;
+            out << YAML::EndMap; // Texture
+        }
+        
+        out << YAML::EndMap; // Assets
+    }
+
     void SceneSerializer::Serialize(const std::string& filepath){
         YAML::Emitter out;
-        out << YAML::BeginMap;
+        out << YAML::BeginMap; // Scene
 		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
-		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
+		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq; // Entity
+        LTB_CORE_TRACE("Serialized Scene ...");
         mScene->AllEntt<Entity>([this, &out] (auto entityID) {
             Entity entity = Entity(&mScene->mRegistry, entityID);
             if(!entity)
                 return;
             SerializeEntity(out, entity);
         });
+        out << YAML::EndSeq; // Entity
 
-        out << YAML::EndSeq;
-		out << YAML::EndMap;
+        out << YAML::Key << "Assets" << YAML::Value << YAML::BeginSeq; // Assets
+
+        Application::Get().AssetView([&] (auto* asset) 
+        {
+            SerializeAssets(out, asset);
+        });
+        
+        out << YAML::EndSeq; // Assets
+		out << YAML::EndMap; // Scene
 
 		std::ofstream fout(filepath);
 		fout << out.c_str();
@@ -367,22 +430,7 @@ namespace LTB {
         //todo
     }
 
-    bool SceneSerializer::Deserialize(const std::string& filepath){        
-        YAML::Node data;
-        try{
-            data = YAML::LoadFile(filepath);
-        }
-        catch (YAML::ParserException e)
-		{
-            LTB_CORE_ERROR("{}", e.msg);
-			return false;
-		}
-
-		if (!data["Scene"])
-			return false;
-
-        std::string sceneName = data["Scene"].as<std::string>();
-		LTB_CORE_TRACE("Deserializing scene '{0}'", sceneName);
+    void SceneSerializer::DeserializeEntities(YAML::Node& data){        
 
         auto entities = data["Entities"];
 
@@ -465,25 +513,77 @@ namespace LTB {
                     auto& boxProps = spriteProps["Box"];
                     auto& colorProps = spriteProps["Color"];
 
-                    sc.Texture.id = textureProps["ID"].as<unsigned int>();
-                    sc.Texture.height = textureProps["Height"].as<int>();
-                    sc.Texture.width = textureProps["Width"].as<int>();
-                    sc.Texture.format = textureProps["Format"].as<int>();
-                    sc.Texture.mipmaps = textureProps["MipMaps"].as<int>();
+                    for(auto asset : data["Assets"]){
+                        uint64_t uuid = asset["UUID"].as<uint64_t>();
+                        int type = asset["Type"].as<int>();
+                        std::string name = asset["Name"].as<std::string>();
+                        std::string source = asset["Source"].as<std::string>();
+
+                        if(type ==  (int)AssetType::TEXTURE){
+                            auto texture = asset["Texture"];
+
+                            if(texture["ID"].as<unsigned int>() == textureProps["ID"].as<unsigned int>()){
+                                sc.Texture = Application::Get().GetAssets().AddTexture(uuid, source)->Data;
+                            }
+                        }
+                    }
 
                     sc.Box.x = boxProps["X"].as<float>();
                     sc.Box.y = boxProps["Y"].as<float>();
                     sc.Box.width = boxProps["Width"].as<float>();
                     sc.Box.height = boxProps["Height"].as<float>();
 
-                    // sc.color = colorProps.as<Color>();
-                    // sc.color.r = colorProps.as<Color>().r;
-                    // sc.color.g = colorProps.as<Color>().g;
-                    // sc.color.b = colorProps.as<Color>().b;
-                    // sc.color.a = colorProps.as<Color>().a;
+                    sc.color = colorProps.as<Color>();
+                    sc.color.r = colorProps.as<Color>().r;
+                    sc.color.g = colorProps.as<Color>().g;
+                    sc.color.b = colorProps.as<Color>().b;
+                    sc.color.a = colorProps.as<Color>().a;
                 }
             }
         }
+    }
+
+    void SceneSerializer::DeserializeAssets(YAML::Node& data){
+        auto assets = data["Assets"];
+        
+        if(assets){
+            for(auto asset : assets){
+                uint64_t uuid = asset["UUID"].as<uint64_t>();
+                int type = asset["Type"].as<int>();
+                std::string name = asset["Name"].as<std::string>();
+                std::string source = asset["Source"].as<std::string>();
+                LTB_CORE_TRACE("Deserialized asset with ID = {0}, name = {1}", uuid, name);
+                if(type == (int)AssetType::TEXTURE){
+                    auto texture = asset["Texture"];
+                    unsigned int id = texture["ID"].as<unsigned int>();
+                    int height = texture["Height"].as<int>();
+                    int width = texture["Width"].as<int>();
+                    int format = texture["Format"].as<int>();
+                    int mipmaps = texture["MipMaps"].as<int>();                    
+                }
+            }
+        }
+    }
+
+    bool SceneSerializer::Deserialize(const std::string& filepath){        
+        YAML::Node data;
+        try{
+            data = YAML::LoadFile(filepath);
+        }
+        catch (YAML::ParserException e)
+		{
+            LTB_CORE_ERROR("{}", e.msg);
+			return false;
+		}
+
+		if (!data["Scene"])
+			return false;
+
+        std::string sceneName = data["Scene"].as<std::string>();
+		LTB_CORE_TRACE("Deserializing scene '{0}'", sceneName);
+
+        DeserializeEntities(data);
+        DeserializeAssets(data);
 
         return true;
     }

@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorLayer.h"
 #include "SceneSerializer.h"
+#include <ImGuiFileDialog.h>
 
 namespace LTB {
 
@@ -29,12 +30,12 @@ namespace LTB {
                     if (ImGui::MenuItem(ICON_FA_STORE " Save Scene", "Ctrl+S")) {
                         context->SaveScene();
                     }
-                    if (ImGui::MenuItem(ICON_FA_STORE " Save Scene As", "Ctrl+S")) {
+                    if (ImGui::MenuItem(ICON_FA_STORE " Save Scene As", "Ctrl+Shift+S")) {
                         context->SaveSceneAs();
                     }
                     if (ImGui::MenuItem(ICON_FA_DOOR_CLOSED " Exit", "Alt+F4")) {
                         Application::Get().Close();    
-                    }
+                    }                    
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Scene")) 
@@ -67,9 +68,12 @@ namespace LTB {
                     if (ImGui::MenuItem(ICON_FA_QUESTION " About")) {}
                     ImGui::EndMenu();
                 }
+                // drawGui();
                 ImGui::EndMainMenuBar();
+
             }
-            ImGui::PopStyleVar();
+            
+            ImGui::PopStyleVar();        
         }
     };
 }

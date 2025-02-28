@@ -33,9 +33,10 @@ set(YAML_CPP_BUILD_CONTRIB OFF)
 set(YAML_CPP_BUILD_TOOLS OFF)
 set(YAML_CPP_BUILD_TESTS OFF)
 add_subdirectory(Vendor/yaml-cpp)
+add_subdirectory(Vendor/ImGuiFileDialog)
 
 # project subdirectories
 
 add_subdirectory(Engine)
 add_subdirectory(Editor)
-# add_subdirectory(Test)
+add_subdirectory(Sandbox)

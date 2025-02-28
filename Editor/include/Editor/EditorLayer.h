@@ -27,6 +27,7 @@ namespace LTB {
         void SaveScene();
         void SaveSceneAs();
         void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
+        void Controls();
 
     public:
         template<typename T, typename... Args>
@@ -56,7 +57,8 @@ namespace LTB {
     private:
         std::vector<Widget> mWindows;
         Ref<Scene> mActiveScene;
-
+        std::string filePath;
+        std::string filePathName;
         enum class SceneState
 		{
 			Edit = 0, Play = 1
@@ -64,5 +66,6 @@ namespace LTB {
 		SceneState mSceneState = SceneState::Edit;
         Scope<Framebuffer> mBuffer;        
         friend class MenuBarWindow;
+        friend class ViewportWindow;
     };
 }
