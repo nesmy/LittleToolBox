@@ -46,6 +46,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     # ${CMAKE_SOURCE_DIR}/Vendor/raygizmo/include
     ${CMAKE_SOURCE_DIR}/Vendor/raylib/src
     ${CMAKE_SOURCE_DIR}/Vendor/ImGuiFileDialog
+    ${CMAKE_SOURCE_DIR}/Vendor/lua
+    ${CMAKE_SOURCE_DIR}/Vendor/sol2/include
 )
 
 # link libraries
@@ -58,6 +60,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     ImGuiFileDialog
     rImGui    
     yaml-cpp
+    sol2
+    lua
 )
 
 
@@ -70,4 +74,15 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Data)
     )
 else()
     message(WARNING "[WARNING] no Data directory!")
+endif()
+
+# copy resources
+if(EXISTS ${CMAKE_SOURCE_DIR}/Script)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND 
+        ${CMAKE_COMMAND} -E copy_directory 
+        ${CMAKE_SOURCE_DIR}/Script
+        ${EXECUTABLE_OUTPUT_PATH}/Data/Script
+    )
+else()
+    message(WARNING "[WARNING] no Script directory!")
 endif()

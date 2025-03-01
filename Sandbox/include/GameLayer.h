@@ -22,14 +22,7 @@ public:
     }
 
     inline void OnImGuiRender() override{
-        ClearBackground(RED);        
-
-        MainScene->EnttView<LTB::Entity, LTB::SpriteComponent>([this] (auto entity, auto& comp){
-            auto& transform = entity.template Get<LTB::TransformComponent>().Transforms;
-            DrawRectangleRec(comp.mSprite.Box, GREEN);
-            DrawTextureV(comp.mSprite.Texture, {transform.translation.x, transform.translation.y}, WHITE);
-            // LTB_CORE_INFO("x: {}, y: {}",transform.translation.x, transform.translation.y);
-        });
+        MainScene->OnUpdateEditor(100);
     }
 private:
     LTB::Ref<LTB::Scene> MainScene;

@@ -31,6 +31,7 @@ namespace LTB {
         auto asset2 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/3_club.png");
         auto asset3 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/4_club.png");
         auto model1 = Application::Get().GetAssets().AddModel(RandomU64(), "Resources/Models/sphere.obj");
+        auto scriptAsset = Application::Get().GetAssets().AddScript(RandomU64(), "Data/Script/TestScript.lua");
 
         SceneSerializer serializer(mActiveScene);
         // serializer.Deserialize("Resources/Saves/test.data");
@@ -40,26 +41,30 @@ namespace LTB {
         // cam.Attach<CameraComponent>();
         // auto& camTs = cam.Attach<TransformComponent>().Transforms;
         // camTs.translation = Vector3{0.0f};
-#if 0
+#if 1
         auto test = mActiveScene->CreateEntity("Test");
         auto& mod = test.Attach<ModelComponent>();
         mod.mModel = model1->Data;
         mod.Box = GetMeshBoundingBox(mod.mModel.meshes[0]);
 
-        auto test2 = mActiveScene->CreateEntity("Test1");
+        auto test2 = mActiveScene->CreateEntity("Test2");
         test2.Get<TransformComponent>().Transforms.translation.x = -10;
         auto& mod2 = test2.Attach<ModelComponent>();
         mod2.mModel = model1->Data;
         mod2.Box = GetMeshBoundingBox(mod2.mModel.meshes[0]);
+        test2.Attach<ScriptComponent>().Script = scriptAsset->UID;
 
-        auto test1 = mActiveScene->CreateEntity("Test2");
+        auto test1 = mActiveScene->CreateEntity("Test1");
         auto& ts = test1.Get<TransformComponent>().Transforms;
         auto& sprite = test1.Attach<SpriteComponent>().mSprite;
         sprite.Texture = asset1->Data;
         ts.translation.x = 10;
         sprite.Box = {ts.translation.x, ts.translation.y, (float)(sprite.Texture.width + 5), (float)(sprite.Texture.height + 5)};
+        test1.Attach<ScriptComponent>().Script = scriptAsset->UID;
         // ts.translation.y = 100;
 #endif
+
+        mActiveScene->Init();
     }
 
     void EditorLayer::OnDetach(){

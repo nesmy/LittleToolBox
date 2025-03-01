@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "UUID.h"
+#include "Scripts/Context.h"
 
 namespace LTB {
 
@@ -11,7 +12,7 @@ namespace LTB {
     public:
         Scene();
         ~Scene();
-
+        void Init();
         static Ref<Scene> Copy(Ref<Scene> other);
 
         Entity CreateEntity(const std::string& name = std::string());
@@ -76,6 +77,7 @@ namespace LTB {
         bool &Is2D() { return Switch2d;}  
         void BlockUpdate(bool update);    
     private:
+        Scope<ScriptContext> mScript;
         EntityRegistry mRegistry;        
         Camera3D mGlobalCam = {0};
         Camera2D mGlobalCam2D = {0};

@@ -34,7 +34,7 @@ namespace LTB {
                         context->SaveSceneAs();
                     }
                     if (ImGui::MenuItem(ICON_FA_DOOR_CLOSED " Exit", "Alt+F4")) {
-                        Application::Get().Close();    
+                        Application::Get().Close();                          
                     }                    
                     ImGui::EndMenu();
                 }
@@ -70,7 +70,6 @@ namespace LTB {
                 }
                 // drawGui();
                 ImGui::EndMainMenuBar();
-
             }
             
             ImGui::PopStyleVar();        

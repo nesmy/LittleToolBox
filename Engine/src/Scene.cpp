@@ -15,8 +15,20 @@ namespace LTB {
         mGlobalCam2D.zoom = 1.0f;
 
         Switch2d = false;
+
+        mScript = CreateScope<ScriptContext>(&mRegistry);
     }
     Scene::~Scene(){}
+
+    void Scene::Init(){
+         // creates and start scripts         
+        EnttView<Entity, ScriptComponent>([this] (auto& entity, auto& comp)
+        {
+            auto& script = Application::Get().GetAssets().Get<ScriptAsset>(comp.Script);            
+            auto name = mScript->LoadScript(script.Source);            
+            mScript->AttachScript(entity, name);
+        });
+    }
 
     Ref<Scene> Scene::Copy(Ref<Scene> other){
         Ref<Scene> newScene = CreateRef<Scene>();
@@ -47,8 +59,28 @@ namespace LTB {
     void Scene::OnRuntimeStart(){}
     void Scene::OnRuntimeStop() {}
 
-    void Scene::OnUpdateRuntime(float deltaTime) {}
-    void Scene::OnUpdateEditor(float deltaTime) {          
+    void Scene::OnUpdateRuntime(float deltaTime) {
+        float dt = deltaTime;
+        //-------------- Script
+        EnttView<Entity, ScriptComponent>([this, dt] (auto entity, auto& script)
+        {
+            if(script.Instance){
+                script.Instance->OnUpdate(dt);
+            }
+        });
+        //---------------------
+
+    }
+    void Scene::OnUpdateEditor(float deltaTime) {   
+        float dt = deltaTime;
+        //-------------- Script
+        EnttView<Entity, ScriptComponent>([this, dt] (auto entity, auto& script)
+        {
+            if(script.Instance){
+                script.Instance->OnUpdate(dt);
+            }
+        });
+        //---------------------       
         if(StopUpdate == false && Switch2d == false)
             UpdateCamera(&mGlobalCam, CAMERA_FREE);   
 
@@ -67,9 +99,10 @@ namespace LTB {
 
         EnttView<Entity, SpriteComponent>([this] (auto entity, auto& comp){
             auto& transform = entity.template Get<TransformComponent>().Transforms;
+            auto& name = entity.template Get<InfoComponent>().Name;
             DrawRectangleRec(comp.mSprite.Box, GREEN);
             DrawTextureV(comp.mSprite.Texture, {transform.translation.x, transform.translation.y}, WHITE);
-            // LTB_CORE_INFO("x: {}, y: {}",transform.translation.x, transform.translation.y);
+            // LTB_CORE_INFO("x: {}, y: {}",transform.translation.x, transform.translation.y);            
         });
         DrawGrid(10, 1.0);
         EndCam();

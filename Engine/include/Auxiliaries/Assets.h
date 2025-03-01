@@ -2,6 +2,7 @@
 
 #include "Config.h"
 #include "Data.h"
+#include "Scripts/Utilities.h"
 
 namespace LTB {    
 
@@ -14,6 +15,7 @@ namespace LTB {
         SCENE,
         MODEL,
         SPRTIE,
+        SCRIPT,
     };
 
      // define the base Asset structure
@@ -45,6 +47,10 @@ namespace LTB {
 
     struct SceneAsset : Asset {
         // to do
+    };
+
+    struct ScriptAsset : Asset {
+        //to do
     };
 
     // define an unordered map to store assets based on their type and UID
@@ -90,6 +96,14 @@ namespace LTB {
             auto asset = CreateRef<SpriteAsset>();
             asset->Data.Texture = LoadTexture(source.c_str());
             asset->Type = AssetType::SPRTIE;
+            Add(uid, source, asset);
+            return asset;
+        }
+
+        inline auto AddScript(AssetID uid, const std::string& source)
+        {
+            auto asset = CreateRef<ScriptAsset>();        
+            asset->Type = AssetType::SCRIPT;
             Add(uid, source, asset);
             return asset;
         }

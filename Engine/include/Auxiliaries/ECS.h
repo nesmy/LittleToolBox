@@ -1,7 +1,5 @@
 #pragma once
-
-#include "Config.h"
-#include "Data.h"
+#include "Assets.h"
 #include "UUID.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -106,6 +104,13 @@ namespace LTB {
         inline SpriteComponent(const SpriteComponent&) = default;
         inline SpriteComponent() = default; 
         Sprite mSprite;
+    };
+
+    struct ScriptComponent {
+        inline ScriptComponent(const ScriptComponent&) = default;
+        inline ScriptComponent() = default; 
+        AssetID Script;
+        LuaScript Instance;
     };
 
     // base entity

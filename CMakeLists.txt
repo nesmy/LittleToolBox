@@ -21,6 +21,7 @@ endif(WIN32)
 
 project(LittleToolBox)
 
+
 # vendor
 
 add_subdirectory(Vendor/raylib)
@@ -34,6 +35,8 @@ set(YAML_CPP_BUILD_TOOLS OFF)
 set(YAML_CPP_BUILD_TESTS OFF)
 add_subdirectory(Vendor/yaml-cpp)
 add_subdirectory(Vendor/ImGuiFileDialog)
+add_subdirectory(Vendor/sol2)
+add_subdirectory(Vendor/lua)
 
 # project subdirectories
 
