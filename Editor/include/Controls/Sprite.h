@@ -32,7 +32,7 @@ namespace LTB {
                 {
                     if(asset->Type == AssetType::TEXTURE){
                         
-                        if(ImGui::ImageButtonEx(asset->UID + 1, 
+                        if(ImGui::ImageButtonEx(asset->UUID + 1, 
                         (ImTextureID)&static_cast<TextureAsset*>(asset)->Data, ImVec2(50, 50), ImVec2(0, 1), 
                         ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1))){
                             data.Texture = static_cast<TextureAsset*>(asset)->Data;

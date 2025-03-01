@@ -21,7 +21,7 @@ namespace LTB {
      // define the base Asset structure
     struct Asset {        
         // generate unique asset id
-        AssetID UID = EMPTY_ASSET; 
+        AssetID UUID = EMPTY_ASSET; 
 
         // file path of asset
         std::string Source;       
@@ -150,16 +150,16 @@ namespace LTB {
         // adds a new asset to the registry
         template <typename T>
         inline void Add(
-            AssetID uid, 
+            AssetID uuid, 
             const std::string& source, 
             Ref<T>& asset
         )
         {            
-            asset->UID = uid;
+            asset->UUID = uuid;
             asset->Source = source;
             std::filesystem::path path(source);
             asset->Name = path.stem().string();
-            mRegistry[TypeID<T>()][asset->UID] = asset;
+            mRegistry[TypeID<T>()][asset->UUID] = asset;
         }
 
         template <typename T>        

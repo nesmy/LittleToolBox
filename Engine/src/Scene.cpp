@@ -94,14 +94,14 @@ namespace LTB {
         EnttView<Entity, ModelComponent>([this] (auto entity, auto& comp){
             auto& transform = entity.template Get<TransformComponent>().Transforms;                        
             DrawModel(comp.mModel,transform.translation , 1.0f, WHITE);
-            DrawBoundingBox(comp.Box, LIME);
+            DrawBoundingBox(comp.Box, LIME);            
         });
 
         EnttView<Entity, SpriteComponent>([this] (auto entity, auto& comp){
             auto& transform = entity.template Get<TransformComponent>().Transforms;
             auto& name = entity.template Get<InfoComponent>().Name;
             DrawRectangleRec(comp.mSprite.Box, GREEN);
-            DrawTextureV(comp.mSprite.Texture, {transform.translation.x, transform.translation.y}, WHITE);
+            DrawTextureV(comp.mSprite.Texture, {transform.translation.x, transform.translation.y}, comp.mSprite.color);
             // LTB_CORE_INFO("x: {}, y: {}",transform.translation.x, transform.translation.y);            
         });
         DrawGrid(10, 1.0);

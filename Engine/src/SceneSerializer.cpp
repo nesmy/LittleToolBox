@@ -378,7 +378,7 @@ namespace LTB {
 
     static void SerializeAssets(YAML::Emitter& out, Asset* asset){
         out << YAML::BeginMap; // Assets
-        out << YAML::Key << "UUID" << YAML::Value << asset->UID;
+        out << YAML::Key << "UUID" << YAML::Value << asset->UUID;
         out << YAML::Key << "Type" << YAML::Value << (int)asset->Type;
         out << YAML::Key << "Name" << YAML::Value << asset->Name;
         out << YAML::Key << "Source" << YAML::Value << asset->Source;

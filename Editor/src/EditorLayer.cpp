@@ -31,6 +31,7 @@ namespace LTB {
         auto asset2 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/3_club.png");
         auto asset3 = Application::Get().GetAssets().AddTexture(RandomU64(), "Resources/Textures/Game/club/4_club.png");
         auto model1 = Application::Get().GetAssets().AddModel(RandomU64(), "Resources/Models/sphere.obj");
+        // auto model2 = Application::Get().GetAssets().AddModel(RandomU64(), "Resources/Models/car.obj");
         auto scriptAsset = Application::Get().GetAssets().AddScript(RandomU64(), "Data/Script/TestScript.lua");
 
         SceneSerializer serializer(mActiveScene);
@@ -52,7 +53,7 @@ namespace LTB {
         auto& mod2 = test2.Attach<ModelComponent>();
         mod2.mModel = model1->Data;
         mod2.Box = GetMeshBoundingBox(mod2.mModel.meshes[0]);
-        test2.Attach<ScriptComponent>().Script = scriptAsset->UID;
+        test2.Attach<ScriptComponent>().Script = scriptAsset->UUID;
 
         auto test1 = mActiveScene->CreateEntity("Test1");
         auto& ts = test1.Get<TransformComponent>().Transforms;
@@ -60,7 +61,7 @@ namespace LTB {
         sprite.Texture = asset1->Data;
         ts.translation.x = 10;
         sprite.Box = {ts.translation.x, ts.translation.y, (float)(sprite.Texture.width + 5), (float)(sprite.Texture.height + 5)};
-        test1.Attach<ScriptComponent>().Script = scriptAsset->UID;
+        test1.Attach<ScriptComponent>().Script = scriptAsset->UUID;
         // ts.translation.y = 100;
 #endif
 

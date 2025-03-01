@@ -5,6 +5,7 @@
 #include "Camera2D.h"
 #include "Sprite.h"
 #include "Script.h"
+#include "Model.h"
 
 namespace LTB {
 
@@ -16,6 +17,7 @@ namespace LTB {
             mWidgets.push_back(context->CreateWidget<Camera2DControl>());
             mWidgets.push_back(context->CreateWidget<SpriteControl>());
             mWidgets.push_back(context->CreateWidget<ScriptControl>());
+            mWidgets.push_back(context->CreateWidget<ModelControl>());
         }
 
         inline void OnShow(EditorLayer* context) override{

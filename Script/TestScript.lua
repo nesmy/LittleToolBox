@@ -70,4 +70,3 @@ end
 function TestScript.OnDestroy(self)
     print("destroyed:", self.Entity)
 end
-

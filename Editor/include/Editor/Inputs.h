@@ -64,7 +64,12 @@ namespace LTB {
     inline bool InputColor(const char* label, Color* color){
         BeginInput(label);
         float r = (float)color->r;
-        bool hasChanged = ImGui::ColorEdit4("##", {&r});
+        ImVec4 *ImColor = (ImVec4*)color;
+        // ImColor->x = (float)color->r;
+        // ImColor->y = (float)color->g;
+        // ImColor->z = (float)color->b;
+        // ImColor->w = (float)color->a;
+        bool hasChanged = ImGui::ColorEdit4("##", (float*)ImColor);
         EndInput();
 
         return hasChanged;

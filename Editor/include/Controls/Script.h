@@ -1,5 +1,6 @@
 #pragma once
 #include "IControl.h"
+#include "Application.h"
 
 namespace LTB {
 
@@ -10,10 +11,26 @@ namespace LTB {
             SetTitle(ICON_FA_INFO "\tScript");
         }
 
+        inline ~ScriptControl(){
+            // UnloadFileData(file);
+        }
+
         inline void OnBody(EditorLayer* context, Entity& entity) 
         {
-            // auto& data = entity.template Get<InfoComponent>();
-            // InputText("Name", data.Name.data(), "Untitled", 64);
+            // std::string test;
+            // test.data()
+            auto uuid = entity.template Get<ScriptComponent>().Script;            
+            int size;            
+            Application::Get().AssetView([&] (auto* asset)
+            {
+                if(uuid == asset->UUID && count == 0){
+                    file = LoadFileData((const char*)asset->Source.data(), &size);
+                    count++;
+                }
+            });
+            
+            // ImGui::InputTextMultiline("##", (char*)file, size, {300, 200});            
+            
         }
 
         inline void OnMenu(EditorLayer* context, Entity& entity) 
@@ -24,5 +41,7 @@ namespace LTB {
             }        
         }
     private:
+        int count = 0;
+        unsigned char *file;
     };
 }
